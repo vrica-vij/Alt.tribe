@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/* Brand pink, sampled from the logo file (public/Alt Logo.avif, dominant
+   opaque pixel rgb(183, 77, 121)). Every pink on the site uses this. */
+:root {
+  --brand-pink: #b74d79;
+}
+
+/* shadcn-style colour tokens used by the components in components/ui.
+   Tuned for the dark shell. `inline` makes utilities reference the
+   variables directly. */
+@theme inline {
+  --color-background: #0d0b0a;
+  --color-foreground: #ffffff;
+  --color-primary: var(--brand-pink);
+  --color-brand-pink: var(--brand-pink);
+  --color-muted: rgba(255, 255, 255, 0.08);
+  --color-border: rgba(255, 255, 255, 0.18);
+}
+
+/* The ported site styles. Kept as plain CSS rather than rewritten into
+   Tailwind utilities so the visual result stays identical to the static
+   build while the markup moves to React. */
+@import "./site.css";

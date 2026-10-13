@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Alt.Tribe — Curated. Conscious. Different.</title>
+<link rel="icon" type="image/webp" href="Favicon.webp" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --ink: #ffffff;
+    --shell: #0d0b0a;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Bricolage Grotesque", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background: var(--shell);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .hero__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+
+  .hero__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.18) 32%, rgba(0,0,0,.30) 62%, rgba(0,0,0,.65) 100%);
+  }
+
+  /* ---------- Navbar ---------- */
+  .nav {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 20px clamp(18px, 3vw, 44px);
+  }
+
+  .nav__logo {
+    display: block;
+    flex-shrink: 0;
+    margin-left: 0;
+  }
+
+  .nav__logo img {
+    height: 46px;
+    width: auto;
+    display: block;
+  }
+
+  /* One continuous cylinder holding all four links */
+  .nav__links {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    border: 1px solid rgba(255,255,255,.35);
+    border-radius: 999px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.20) 0%, rgba(255,255,255,.06) 42%, rgba(0,0,0,.10) 100%);
+    backdrop-filter: blur(14px) saturate(1.3);
+    -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.45),
+      inset 0 -1px 0 rgba(0,0,0,.18),
+      0 10px 30px rgba(0,0,0,.28);
+  }
+
+  /* Pill that slides to whichever link is hovered */
+  .nav__glider {
+    position: absolute;
+    top: 5px;
+    bottom: 5px;
+    left: 0;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,.22);
+    opacity: 0;
+    transform: translateX(var(--x, 0px));
+    width: var(--w, 0px);
+    transition: transform .42s cubic-bezier(.22, 1, .36, 1),
+                width .42s cubic-bezier(.22, 1, .36, 1),
+                opacity .25s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .nav__links[data-active] .nav__glider { opacity: 1; }
+
+  .nav__btn {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    padding: 10px clamp(16px, 1.7vw, 24px);
+    border-radius: 999px;
+    color: #fff;
+    font-size: 13px;
+    letter-spacing: .01em;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color .3s ease;
+  }
+
+  .nav__btn:hover,
+  .nav__btn:focus-visible {
+    color: #111;
+  }
+
+  .nav__btn:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+  }
+
+  /* Per-letter variable-weight hover, staggered from the centre */
+  .nav__btn .ch {
+    display: inline-block;
+    font-variation-settings: 'wght' 400;
+    transition: font-variation-settings .35s cubic-bezier(.22, 1, .36, 1);
+    transition-delay: calc(var(--d) * 1ms);
+  }
+
+  .nav__btn:hover .ch,
+  .nav__btn:focus-visible .ch {
+    font-variation-settings: 'wght' 800;
+  }
+
+  .nav__btn .ch--space { width: .28em; }
+
+  /* Reserve the bold width so the cylinder never reflows mid-hover */
+  .nav__btn .ch::after {
+    content: attr(data-ch);
+    display: block;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    font-variation-settings: 'wght' 800;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav__btn .ch { transition: none; }
+  }
+
+  .nav__toggle {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(255,255,255,.45);
+    border-radius: 999px;
+    background: rgba(255,255,255,.08);
+    cursor: pointer;
+  }
+
+  .nav__toggle span,
+  .nav__toggle span::before,
+  .nav__toggle span::after {
+    display: block;
+    width: 18px;
+    height: 1.5px;
+    background: #fff;
+    margin: 0 auto;
+    position: relative;
+  }
+  .nav__toggle span::before { content: ""; position: absolute; top: -6px; }
+  .nav__toggle span::after  { content: ""; position: absolute; top: 6px; }
+
+  /* Burger morphs into an X while the menu is open */
+  .nav__toggle span,
+  .nav__toggle span::before,
+  .nav__toggle span::after { transition: transform .25s ease, opacity .2s ease; }
+
+  .nav__toggle[aria-expanded="true"] span { background: transparent; }
+  .nav__toggle[aria-expanded="true"] span::before { transform: translateY(6px) rotate(45deg); }
+  .nav__toggle[aria-expanded="true"] span::after  { transform: translateY(-6px) rotate(-45deg); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav__toggle span,
+    .nav__toggle span::before,
+    .nav__toggle span::after { transition: none; }
+  }
+
+  /* ---------- Hero copy ---------- */
+  .hero__body {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px clamp(20px, 5vw, 64px) clamp(56px, 10vh, 120px);
+  }
+
+  .hero__title {
+    font-size: clamp(2.1rem, 6.4vw, 5.4rem);
+    font-weight: 800;
+    line-height: 1.04;
+    letter-spacing: -.035em;
+    text-shadow: 0 2px 40px rgba(0,0,0,.45);
+  }
+
+  .hero__sub {
+    margin-top: clamp(18px, 3vh, 30px);
+    font-size: clamp(.95rem, 1.5vw, 1.25rem);
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: -.005em;
+    max-width: 44ch;
+    text-shadow: 0 2px 24px rgba(0,0,0,.5);
+  }
+
+  body { overflow-x: hidden; }
+
+  @media (max-width: 760px) {
+    /* Opening the menu swaps the logo out for the nav pill, so the bar
+       itself becomes the navbar instead of a panel dropping below it. */
+    .nav { padding-block: 16px; }
+
+    .nav__logo {
+      max-width: 30%;
+      opacity: 1;
+      transition: opacity .2s ease;
+    }
+    .nav__logo img { width: 100%; height: auto; max-height: 40px; object-fit: contain; object-position: left center; }
+
+    /* Logo steps aside while the nav is open. Driven by a class rather
+       than :has(), which older mobile browsers don't support. */
+    .nav.is-open .nav__logo {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .nav__links {
+      /* Fills the bar between the (hidden) logo and the toggle */
+      position: absolute;
+      left: clamp(18px, 3vw, 44px);
+      /* The burger is hidden while open, so use the whole bar. */
+      right: clamp(18px, 3vw, 44px);
+      top: 50%;
+      transform: translateY(-50%);
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(3px, 1.2vw, 6px);
+      padding: 4px;
+      animation: nav-in .22s cubic-bezier(.22, 1, .36, 1);
+
+      /* Same brushed-silver body as the desktop 3D pill, so the mobile
+         bar reads as the same object rather than frosted glass. */
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(135deg,
+        #fcfcfd 0%, #f8f8fa 15%, #f3f4f6 30%, #eeeff2 45%,
+        #e9eaed 60%, #e4e5e8 75%, #dee0e3 90%, #e2e3e6 100%);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      box-shadow:
+        0 3px 6px rgba(0, 0, 0, .12),
+        0 8px 16px rgba(0, 0, 0, .10),
+        0 16px 32px rgba(0, 0, 0, .08),
+        0 1px 2px rgba(0, 0, 0, .12),
+        inset 0 2px 1px rgba(255, 255, 255, .7),
+        inset 0 -2px 6px rgba(0, 0, 0, .10),
+        inset 2px 2px 8px rgba(0, 0, 0, .08),
+        inset -2px 2px 8px rgba(0, 0, 0, .07),
+        inset 0 0 1px rgba(0, 0, 0, .15);
+      overflow: hidden;
+    }
+
+    /* Bright top ridge + gloss, mirroring the pill's light catch. */
+    .nav__links::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 55%;
+      border-radius: 999px 999px 0 0;
+      pointer-events: none;
+      background: linear-gradient(180deg,
+        rgba(255,255,255,.45) 0%, rgba(255,255,255,.25) 30%,
+        rgba(255,255,255,.10) 60%, rgba(255,255,255,0) 100%);
+    }
+    .nav__links::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 50%;
+      border-radius: 0 0 999px 999px;
+      pointer-events: none;
+      background: linear-gradient(0deg,
+        rgba(0,0,0,.14) 0%, rgba(0,0,0,.08) 25%,
+        rgba(0,0,0,.03) 50%, rgba(0,0,0,0) 100%);
+    }
+    .nav__links[hidden] { display: none; }
+
+    @keyframes nav-in {
+      from { opacity: 0; transform: translateY(-50%) scale(.96); }
+      to   { opacity: 1; transform: translateY(-50%) scale(1); }
+    }
+
+    /* Each item is its own pill, so they read as three buttons rather
+       than labels sharing one container. */
+    .nav__btn {
+      /* Never squash below the label — shrink padding/type instead. */
+      flex: 0 0 auto;
+      padding: 9px clamp(7px, 2.6vw, 14px);
+      font-size: clamp(11px, 3.3vw, 14px);
+      font-weight: 620;
+      white-space: nowrap;
+      border-radius: 999px;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      /* Engraved lettering from the 3D pill, not flat white text. */
+      position: relative;
+      z-index: 1;
+      color: #656565;
+      letter-spacing: .45px;
+      text-shadow:
+        0 1px 0 rgba(0, 0, 0, .16),
+        0 -1px 0 rgba(255, 255, 255, .75);
+      transition: color .2s ease, transform .15s ease, text-shadow .2s ease;
+    }
+    .nav__btn:active,
+    .nav__btn:focus-visible {
+      color: #1a1a1a;
+      transform: translateY(-1.5px);
+      text-shadow:
+        0 1px 0 rgba(0, 0, 0, .26),
+        0 -1px 0 rgba(255, 255, 255, .85);
+    }
+
+    /* Per-letter weight animation is a pointer affordance; on touch it
+       only makes the labels jitter, so hold a steady weight. */
+    .nav__btn .ch { font-variation-settings: 'wght' 600; transition: none; }
+    .nav__btn:hover .ch,
+    .nav__btn:focus-visible .ch { font-variation-settings: 'wght' 600; }
+
+    .nav__toggle { display: block; position: relative; z-index: 4; }
+
+    /* Once the navbar is showing, the burger has nothing left to say —
+       hide it and let the nav fill the bar. Tapping a link or tapping
+       outside closes it. */
+    .nav.is-open .nav__toggle { display: none; }
+    .nav__glider { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav__btn:hover, .nav__btn:focus-visible { color: #fff; }
+  }
+
+  /* ================= Testimonials ================= */
+  .tstm {
+    --t-berry: #a8325f;
+    --t-gold: #b8912a;
+    --t-ink: #241d1a;
+    --t-muted: #6b5f57;
+
+    background:
+      radial-gradient(120% 90% at 50% 100%, #efe6d8 0%, #e7dccb 55%, #ded2be 100%);
+    color: var(--t-ink);
+    padding: clamp(48px, 8vh, 88px) clamp(20px, 5vw, 64px) clamp(44px, 7vh, 80px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(26px, 4vh, 44px);
+    overflow: hidden;
+  }
+
+  .tstm__head { text-align: center; }
+
+  .tstm__title {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    color: var(--t-berry);
+  }
+
+  .tstm__sub {
+    margin: 12px auto 0;
+    max-width: 48ch;
+    font-size: clamp(.95rem, 1.3vw, 1.1rem);
+    line-height: 1.55;
+    font-weight: 500;
+    color: var(--t-muted);
+  }
+
+  /* Rail: scrolls horizontally when the five clips overflow */
+  .tstm__rail-wrap { width: 100%; max-width: 78rem; }
+
+  .tstm__rail {
+    display: flex;
+    justify-content: center;
+    gap: clamp(12px, 1.6vw, 20px);
+    padding: 4px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .tstm__rail::-webkit-scrollbar { display: none; }
+
+  .reel {
+    position: relative;
+    flex: 0 0 auto;
+    width: clamp(9.5rem, 14vw, 13rem);
+    aspect-ratio: 9 / 16;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #ded2be;
+    border: 1px solid rgba(36,29,26,.10);
+    box-shadow: 0 2px 6px rgba(36,29,26,.08), 0 14px 32px rgba(36,29,26,.16);
+    scroll-snap-align: center;
+    display: block;
+    transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease;
+  }
+
+  .reel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .5s cubic-bezier(.22,1,.36,1);
+  }
+
+  .reel:hover,
+  .reel:focus-visible {
+    transform: translateY(-6px);
+    box-shadow: 0 4px 10px rgba(36,29,26,.10), 0 26px 52px rgba(36,29,26,.26);
+  }
+  .reel:hover img,
+  .reel:focus-visible img { transform: scale(1.05); }
+  .reel:focus-visible { outline: 2px solid var(--t-berry); outline-offset: 3px; }
+
+  /* Play glyph */
+  .reel__play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    /* Outline only — a hairline ring over the photo instead of a solid
+       disc, so the person in the clip stays visible. The faint tint and
+       drop shadow keep it legible on light backgrounds. */
+    background: rgba(20,14,10,.14);
+    border: 1.5px solid rgba(255,255,255,.92);
+    box-shadow:
+      0 1px 6px rgba(20,14,10,.20),
+      inset 0 0 0 .5px rgba(20,14,10,.10);
+    filter: drop-shadow(0 1px 2px rgba(20,14,10,.35));
+    transition:
+      background .28s ease,
+      border-color .28s ease,
+      transform .35s cubic-bezier(.22,1,.36,1);
+  }
+
+  .reel:hover .reel__play,
+  .reel:focus-visible .reel__play {
+    background: var(--t-berry);
+    border-color: var(--t-berry);
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+
+  .reel__play svg {
+    width: 15px;
+    height: 15px;
+    margin-left: 2px;   /* optical centring for the triangle */
+  }
+
+  /* Instagram corner mark */
+  .reel__badge {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: rgba(24,16,12,.38);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
+  .reel__badge svg { width: 14px; height: 14px; }
+
+  .tstm__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(168,50,95,.32);
+    background: rgba(255,255,255,.55);
+    color: var(--t-berry);
+    font-size: .9rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background .25s ease, color .25s ease, border-color .25s ease;
+  }
+  .tstm__cta:hover,
+  .tstm__cta:focus-visible {
+    background: var(--t-berry);
+    border-color: var(--t-berry);
+    color: #fff;
+  }
+  .tstm__cta svg { width: 15px; height: 15px; }
+
+  /* Phones: show all five at once like desktop, as a wrapping grid
+     rather than a rail the user has to scroll sideways. */
+  @media (max-width: 900px) {
+    .tstm__rail {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      overflow-x: visible;
+    }
+    .reel { width: auto; }
+  }
+
+  @media (max-width: 560px) {
+    .tstm__rail { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reel, .reel img, .reel__play { transition: none; }
+  }
+
+  /* ================= Instagram feed ================= */
+  .ig {
+    --i-berry: #a8325f;
+    --i-ink: #241d1a;
+    --i-muted: #6b5f57;
+
+    background: #fffdf9;
+    color: var(--i-ink);
+    padding: clamp(44px, 7vh, 80px) clamp(16px, 4vw, 56px) clamp(44px, 7vh, 78px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(24px, 4vh, 40px);
+  }
+
+  .ig__head { text-align: center; }
+
+  .ig__pill {
+    display: inline-block;
+    padding: 12px 34px;
+    border-radius: 999px;
+    border: 2px solid var(--i-berry);
+    color: var(--i-berry);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+    font-weight: 600;
+    text-decoration: none;
+    transition: background .25s ease, color .25s ease;
+  }
+  .ig__pill:hover,
+  .ig__pill:focus-visible { background: var(--i-berry); color: #fff; }
+
+  .ig__handle {
+    margin-top: 12px;
+    font-size: clamp(.9rem, 1.2vw, 1rem);
+    font-weight: 600;
+    color: var(--i-berry);
+  }
+
+  .ig__sub {
+    margin: 8px auto 0;
+    max-width: 46ch;
+    font-size: clamp(.86rem, 1.1vw, .98rem);
+    line-height: 1.55;
+    color: var(--i-muted);
+  }
+
+  /* Tiles: fluid grid, 9:16 like the reels themselves */
+  .ig__grid {
+    width: 100%;
+    max-width: 82rem;
+    display: grid;
+    /* Six across at every size, matching desktop — auto-fit would
+       reflow phones to two columns and break the single-row look. */
+    grid-template-columns: repeat(6, 1fr);
+    gap: clamp(5px, 1vw, 14px);
+  }
+
+  @media (max-width: 560px) {
+    .ig__grid { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+  }
+
+  .ig-tile {
+    position: relative;
+    display: block;
+    aspect-ratio: 9 / 16;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #ece3d6;
+    text-decoration: none;
+    transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease;
+  }
+
+  .ig-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .55s cubic-bezier(.22,1,.36,1);
+  }
+
+  .ig-tile__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg,
+      rgba(20,14,10,0) 45%,
+      rgba(20,14,10,.42) 80%,
+      rgba(20,14,10,.68) 100%);
+    opacity: .9;
+    transition: opacity .35s ease;
+  }
+
+  .ig-tile:hover,
+  .ig-tile:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(36,29,26,.22);
+  }
+  .ig-tile:hover img,
+  .ig-tile:focus-visible img { transform: scale(1.06); }
+  .ig-tile:focus-visible { outline: 2px solid var(--i-berry); outline-offset: 3px; }
+
+  /* Content-type label, bottom-left like the reference's counter */
+  .ig-tile__tag {
+    position: absolute;
+    left: 9px;
+    bottom: 9px;
+    right: 9px;
+    color: #fff;
+    font-size: clamp(.6rem, .78vw, .72rem);
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    text-shadow: 0 1px 3px rgba(0,0,0,.5);
+    line-height: 1.3;
+  }
+
+  .ig__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 24px;
+    border-radius: 999px;
+    background: var(--i-berry);
+    color: #fff;
+    font-size: .9rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: opacity .25s ease, transform .25s ease;
+  }
+  .ig__cta:hover,
+  .ig__cta:focus-visible { opacity: .88; transform: translateY(-1px); }
+  .ig__cta svg { width: 16px; height: 16px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ig-tile, .ig-tile img { transition: none; }
+  }
+
+  /* ================= Footer ================= */
+  .footer {
+    --f-berry: #8f2a50;
+    --f-berry-deep: #78223f;
+    --f-cream: #f3ead8;
+    --f-line: rgba(255,255,255,.18);
+    --f-muted: rgba(255,255,255,.68);
+
+    background: linear-gradient(140deg, var(--f-berry) 0%, var(--f-berry-deep) 100%);
+    color: #fff;
+    padding: clamp(40px, 6vh, 64px) clamp(20px, 5vw, 64px) 0;
+  }
+
+  /* Brand block + link grid side by side (stacks under 1024px) */
+  .footer__inner {
+    max-width: 80rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: clamp(28px, 4vw, 40px);
+  }
+
+  .footer__brand {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100%;
+  }
+
+  .footer__brandmark { display: inline-block; width: fit-content; }
+
+  .footer__logo {
+    height: 34px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  .footer__desc {
+    max-width: 38ch;
+    font-size: .88rem;
+    line-height: 1.6;
+    color: var(--f-muted);
+  }
+
+  .footer__social {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    list-style: none;
+  }
+
+  .footer__social a {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--f-line);
+    display: grid;
+    place-items: center;
+    color: #fff;
+    transition: background .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .footer__social a:hover,
+  .footer__social a:focus-visible {
+    background: var(--f-cream);
+    border-color: var(--f-cream);
+    color: var(--f-berry-deep);
+  }
+  .footer__social svg { width: 15px; height: 15px; }
+
+  .footer__grid {
+    display: grid;
+    width: 100%;
+    gap: clamp(22px, 3vw, 48px);
+  }
+
+  .footer__heading {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--f-cream);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    list-style: none;            /* kill the native disclosure triangle */
+  }
+  .footer__heading::-webkit-details-marker { display: none; }
+
+  /* Desktop: columns are plain lists — no toggling, no chevron. The
+     About block has no heading there, just the description + socials. */
+  .footer__chev { display: none; }
+  @media (min-width: 621px) {
+    .footer__col > summary { pointer-events: none; }
+    .footer__col--about > summary { display: none; }
+  }
+
+  .footer__col ul:not(.footer__social) {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .footer__col a {
+    font-size: .86rem;
+    line-height: 1.4;
+    color: var(--f-muted);
+    text-decoration: none;
+    transition: color .2s ease;
+  }
+  .footer__col a:hover,
+  .footer__col a:focus-visible { color: #fff; }
+
+  .footer__note {
+    display: block;
+    font-size: .82rem;
+    line-height: 1.5;
+    color: var(--f-muted);
+  }
+
+  .footer__bottom {
+    max-width: 80rem;
+    margin: clamp(26px, 4vh, 36px) auto 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 14px;
+    padding: clamp(18px, 2.6vh, 26px) 0;
+    border-top: 1px solid var(--f-line);
+    font-size: .76rem;
+    color: var(--f-muted);
+  }
+
+  /* Two links fit on one line at any width — no need to stack. */
+  .footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    list-style: none;
+  }
+  .footer__legal a {
+    color: var(--f-muted);
+    text-decoration: none;
+    transition: color .2s ease;
+  }
+  .footer__legal a:hover,
+  .footer__legal a:focus-visible { color: #fff; }
+
+  /* Phones: each column becomes a tappable accordion row. */
+  @media (max-width: 620px) {
+    .footer__grid { gap: 0; }
+    /* Brand block and grid are siblings; their gap would show as a
+       dead band between the About row and Shop. */
+    .footer__inner { gap: 0; }
+
+    .footer__col {
+      border-top: 1px solid var(--f-line);
+    }
+    .footer__grid .footer__col:last-of-type { border-bottom: 1px solid var(--f-line); }
+
+    /* About sits in the brand block, above the grid — same row styling,
+       and its own spacing since <details> isn't the flex parent. */
+    .footer__brand { gap: 0; }
+    /* Centre the logo over the full-width accordion rows below it. */
+    .footer__brandmark { margin: 0 auto 20px; }
+    .footer__logo { margin-inline: auto; }
+    .footer__col--about > .footer__desc { padding: 2px 2px 14px; }
+    /* Keep the icons in a row — the generic `.footer__col ul` rule
+       turns lists into a centred column inside an accordion. */
+    .footer__col--about > .footer__social {
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 10px;
+      padding: 0 2px 16px;
+    }
+
+    .footer__heading {
+      margin-bottom: 0;
+      padding: 15px 2px;
+      cursor: pointer;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .footer__heading:focus-visible { outline: 2px solid var(--f-cream); outline-offset: -2px; }
+
+    .footer__chev {
+      display: block;
+      width: 17px;
+      height: 17px;
+      flex-shrink: 0;
+      transition: transform .25s ease;
+    }
+    .footer__col[open] .footer__chev { transform: rotate(180deg); }
+
+    .footer__col ul:not(.footer__social) { padding: 2px 2px 16px; gap: 13px; }
+
+    /* Roomier tap targets for the links inside */
+    .footer__col a { padding: 2px 0; }
+
+    /* The last accordion already draws a rule, so drop the bottom bar's
+       own border and margin — otherwise they stack into an empty band. */
+    .footer__bottom {
+      margin-top: 0;
+      border-top: 0;
+      padding-top: 18px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .footer__grid { grid-template-columns: repeat(2, 1fr); }
+    .footer__bottom { flex-direction: row; align-items: center; }
+    .footer__legal { gap: 20px; }
+  }
+
+  @media (min-width: 1024px) {
+    .footer__inner { flex-direction: row; align-items: flex-start; }
+    .footer__brand { max-width: 24rem; flex-shrink: 0; }
+  }
+
+
+  /* ---------------- Loading screen ----------------
+     Covers the page until `load` fires, so slow connections see the mark
+     instead of a bare shell. Styles live inline in <head> so the overlay
+     paints on first frame, before any stylesheet arrives.            */
+  .boot {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: grid;
+    place-items: center;
+    background: var(--shell);
+    transition: opacity .5s ease, visibility .5s ease;
+  }
+
+  .boot__logo {
+    width: clamp(120px, 22vw, 190px);
+    height: auto;
+    animation: boot-pulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes boot-pulse {
+    0%, 100% { opacity: .55; transform: scale(.97); }
+    50%      { opacity: 1;   transform: scale(1); }
+  }
+
+  /* `is-done` is set once the page is ready; the element is then removed
+     from the a11y tree and from hit-testing. */
+  .boot.is-done {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .boot__logo { animation: none; opacity: 1; transform: none; }
+    .boot { transition: opacity .01s linear, visibility .01s linear; }
+  }
+
+
+  /* ---------------- About: split copy + portrait photo ---------------- */
+  .about {
+    --a-berry: #a8325f;
+    --a-ink: #241d1a;
+    --a-muted: #6b5f57;
+
+    background: #fffdf9;
+    color: var(--a-ink);
+    padding: clamp(52px, 9vh, 96px) clamp(20px, 5vw, 64px);
+    display: flex;
+    justify-content: center;
+  }
+
+  .about__inner {
+    width: 100%;
+    max-width: 78rem;
+    display: grid;
+    /* Photo column is narrower than the copy — the image supports the
+       text rather than competing with it. */
+    grid-template-columns: minmax(0, .78fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(28px, 5vw, 72px);
+  }
+
+  .about__eyebrow {
+    display: inline-block;
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--a-berry);
+    margin-bottom: clamp(12px, 1.8vh, 18px);
+  }
+
+  .about__title {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(2rem, 3.6vw, 3.1rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    color: var(--a-berry);
+  }
+
+  .about__body {
+    margin-top: clamp(16px, 2.4vh, 24px);
+    font-size: clamp(.98rem, 1.25vw, 1.12rem);
+    line-height: 1.68;
+    font-weight: 500;
+    color: var(--a-muted);
+  }
+
+  .about__body + .about__body { margin-top: clamp(12px, 1.6vh, 18px); }
+
+  .about__count {
+    font-variation-settings: 'wght' 700;
+    color: var(--a-berry);
+    white-space: nowrap;
+  }
+
+  /* The closing invitation carries the voice — set it apart. */
+  .about__kicker {
+    margin-top: clamp(18px, 2.6vh, 28px);
+    padding-top: clamp(16px, 2.2vh, 22px);
+    border-top: 1px solid rgba(36, 29, 26, .12);
+    font-family: "Fraunces", Georgia, serif;
+    font-size: clamp(1.02rem, 1.5vw, 1.28rem);
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--a-ink);
+  }
+
+  .about__figure {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #efe6d8;
+    aspect-ratio: 4 / 5;
+    max-width: 24rem;
+    justify-self: center;
+  }
+
+  .about__figure img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media (max-width: 860px) {
+    .about__inner {
+      grid-template-columns: 1fr;
+      gap: clamp(24px, 4vh, 36px);
+    }
+
+    /* Photo already leads in the markup; just reshape it. */
+    .about__figure { aspect-ratio: 3 / 2; max-width: none; }
+  }
+
+</style>
+</head>
+<body>
+<div class="boot" id="boot" role="status" aria-label="Loading Alt.Tribe">
+  <img class="boot__logo" src="Alt Logo.avif" alt="" fetchpriority="high" />
+</div>
+<noscript>
+  <style>.boot { display: none; }</style>
+</noscript>
+
+
+<section class="hero">
+  <video class="hero__video" autoplay muted loop playsinline preload="metadata"
+         poster="Favicon.webp">
+    <source src="c0c2d9c97d154076aea285b73950d4d5.HD-1080p-7.2Mbps-50411234.mp4" type="video/mp4" />
+  </video>
+  <div class="hero__scrim"></div>
+
+  <header class="nav">
+    <a class="nav__logo" href="#" aria-label="Alt.Tribe home">
+      <img src="Alt Logo.avif" alt="Alt.Tribe" />
+    </a>
+
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav-links">
+      <span></span>
+    </button>
+
+    <nav class="nav__links" id="nav-links">
+      <span class="nav__glider" aria-hidden="true"></span>
+      <a class="nav__btn" href="#about">About</a>
+      <a class="nav__btn" href="#connect">Connect</a>
+      <a class="nav__btn" href="#reviews">Reviews</a>
+    </nav>
+  </header>
+
+  <div class="hero__body">
+    <h1 class="hero__title">Curated. Conscious. Different.</h1>
+    <p class="hero__sub">One scroll, hundred of rare finds. Alt.Tribe is where India's coolest creators collide.</p>
+  </div>
+</section>
+
+
+<section class="about" id="about">
+  <div class="about__inner">
+    <!-- TEMPORARY IMAGE: swap for a real interior shot when available. -->
+    <figure class="about__figure">
+      <img src="ig-6.jpg" alt="Inside the Alt.Tribe store" loading="lazy" width="900" height="1125" />
+    </figure>
+
+    <div class="about__copy">
+      <span class="about__eyebrow">Greater Kailash II, Delhi</span>
+      <h2 class="about__title">About Us</h2>
+      <p class="about__body">
+        Alt Tribe is a marketplace for the wonderfully different.
+      </p>
+      <p class="about__body">
+        We bring together
+        <span class="about__count">100+ independent brands</span> across jewellery,
+        clothing, home &amp; decor, skincare, wellness, bags and edibles — working with
+        small businesses and emerging labels who want real-world retail without
+        building an entire store from scratch.
+      </p>
+      <p class="about__body">
+        But Alt Tribe is more than a place to sell. It's an ecosystem of 100+ brands
+        under one roof, creating a constantly changing world of discovery — homegrown
+        brands, independent creators, sustainable choices, unexpected finds.
+      </p>
+      <p class="about__kicker">
+        Basically, if you're tired of the same old, same old, you're probably going to
+        like it here.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="tstm" id="reviews">
+  <div class="tstm__head">
+    <h2 class="tstm__title">In Their Words</h2>
+    <p class="tstm__sub">Real shoppers, filmed in the store. Tap any clip to watch it on Instagram.</p>
+  </div>
+
+  <div class="tstm__rail-wrap">
+    <div class="tstm__rail">
+      <a class="reel" href="https://www.instagram.com/reel/DYkEfgtB3Vl/" target="_blank" rel="noopener"
+         aria-label="Watch on Instagram: Happy dance when a customer loves your brand">
+        <img src="testimonial-1.jpg" alt="Happy dance when a customer loves your brand" loading="lazy" width="361" height="640" />
+        <span class="reel__play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M9.5 6.4v11.2L18.5 12z"/></svg>
+        </span>
+        <span class="reel__badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+        </span>
+      </a>
+      <a class="reel" href="https://www.instagram.com/reel/DOpqMkBAX94/" target="_blank" rel="noopener"
+         aria-label="Watch on Instagram: Customer experience at the Alt.Tribe store">
+        <img src="testimonial-2.jpg" alt="Customer experience at the Alt.Tribe store" loading="lazy" width="361" height="640" />
+        <span class="reel__play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M9.5 6.4v11.2L18.5 12z"/></svg>
+        </span>
+        <span class="reel__badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+        </span>
+      </a>
+      <a class="reel" href="https://www.instagram.com/reel/DM5ZancMPdl/" target="_blank" rel="noopener"
+         aria-label="Watch on Instagram: A shopper on what she found at Alt.Tribe">
+        <img src="testimonial-3.jpg" alt="A shopper on what she found at Alt.Tribe" loading="lazy" width="361" height="640" />
+        <span class="reel__play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M9.5 6.4v11.2L18.5 12z"/></svg>
+        </span>
+        <span class="reel__badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+        </span>
+      </a>
+      <a class="reel" href="https://www.instagram.com/reel/DJO8yM8SHti/" target="_blank" rel="noopener"
+         aria-label="Watch on Instagram: Customer experience at the Alt.Tribe store">
+        <img src="testimonial-4.jpg" alt="Customer experience at the Alt.Tribe store" loading="lazy" width="361" height="640" />
+        <span class="reel__play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M9.5 6.4v11.2L18.5 12z"/></svg>
+        </span>
+        <span class="reel__badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+        </span>
+      </a>
+      <a class="reel" href="https://www.instagram.com/reel/DI1YByry977/" target="_blank" rel="noopener"
+         aria-label="Watch on Instagram: A shopper shares her Alt.Tribe haul">
+        <img src="testimonial-5.jpg" alt="A shopper shares her Alt.Tribe haul" loading="lazy" width="361" height="640" />
+        <span class="reel__play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M9.5 6.4v11.2L18.5 12z"/></svg>
+        </span>
+        <span class="reel__badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+        </span>
+      </a>
+      <a class="reel" href="https://www.instagram.com/reel/DGfp6I4ziQN/" target="_blank" rel="noopener"
+         aria-label="Watch on Instagram: A shopper reviews her Alt.Tribe visit">
+        <img src="testimonial-6.jpg" alt="A shopper reviews her Alt.Tribe visit" loading="lazy" width="360" height="640" />
+        <span class="reel__play" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M9.5 6.4v11.2L18.5 12z"/></svg>
+        </span>
+        <span class="reel__badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+
+  <a class="tstm__cta" href="https://www.instagram.com/alt.tribe.in/" target="_blank" rel="noopener">
+    See more on Instagram
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+  </a>
+</section>
+
+<section class="ig" id="connect">
+  <div class="ig__head">
+    <a class="ig__pill" href="https://www.instagram.com/alt.tribe.in/" target="_blank" rel="noopener">Follow Us</a>
+    <p class="ig__handle">@alt.tribe.in</p>
+    <p class="ig__sub">Store tours, new arrivals, maker collabs and customer hauls — posted weekly.</p>
+  </div>
+
+  <div class="ig__grid">
+      <a class="ig-tile" href="https://www.instagram.com/reel/DblXErWhSfe/" target="_blank" rel="noopener"
+         aria-label="Calling small businesses to stock with us — watch on Instagram">
+        <img src="ig-1.jpg" alt="Calling small businesses to stock with us" loading="lazy" width="360" height="640" />
+        <span class="ig-tile__scrim" aria-hidden="true"></span>
+        <span class="ig-tile__tag">For Small Businesses</span>
+      </a>
+      <a class="ig-tile" href="https://www.instagram.com/reel/DbGS3sroJ6i/" target="_blank" rel="noopener"
+         aria-label="A founder talks through the store — watch on Instagram">
+        <img src="ig-2.jpg" alt="A founder talks through the store" loading="lazy" width="360" height="640" />
+        <span class="ig-tile__scrim" aria-hidden="true"></span>
+        <span class="ig-tile__tag">Founder Diaries</span>
+      </a>
+      <a class="ig-tile" href="https://www.instagram.com/reel/DanPesdhR3K/" target="_blank" rel="noopener"
+         aria-label="Picking between rail finds in store — watch on Instagram">
+        <img src="ig-3.jpg" alt="Picking between rail finds in store" loading="lazy" width="360" height="640" />
+        <span class="ig-tile__scrim" aria-hidden="true"></span>
+        <span class="ig-tile__tag">This or That</span>
+      </a>
+      <a class="ig-tile" href="https://www.instagram.com/reel/DafhmR3ByLG/" target="_blank" rel="noopener"
+         aria-label="The team at the Alt.Tribe counter — watch on Instagram">
+        <img src="ig-4.jpg" alt="The team at the Alt.Tribe counter" loading="lazy" width="360" height="640" />
+        <span class="ig-tile__scrim" aria-hidden="true"></span>
+        <span class="ig-tile__tag">Behind the Counter</span>
+      </a>
+      <a class="ig-tile" href="https://www.instagram.com/reel/DaXxpITBrww/" target="_blank" rel="noopener"
+         aria-label="A story from inside the store — watch on Instagram">
+        <img src="ig-5.jpg" alt="A story from inside the store" loading="lazy" width="360" height="640" />
+        <span class="ig-tile__scrim" aria-hidden="true"></span>
+        <span class="ig-tile__tag">Store Stories</span>
+      </a>
+      <a class="ig-tile" href="https://www.instagram.com/reel/DZ43lyoBi0D/" target="_blank" rel="noopener"
+         aria-label="POV: an age gap at work — watch on Instagram">
+        <img src="ig-6.jpg" alt="POV: an age gap at work" loading="lazy" width="360" height="640" />
+        <span class="ig-tile__scrim" aria-hidden="true"></span>
+        <span class="ig-tile__tag">Team Skits</span>
+      </a>
+  </div>
+
+  <a class="ig__cta" href="https://www.instagram.com/alt.tribe.in/" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+    View the full feed
+  </a>
+</section>
+
+<footer class="footer">
+  <div class="footer__inner">
+
+    <div class="footer__brand">
+      <a class="footer__brandmark" href="#">
+        <img class="footer__logo" src="Alt Logo.avif" alt="Alt.Tribe" />
+      </a>
+      <details class="footer__col footer__col--about" open>
+        <summary class="footer__heading">About<svg class="footer__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
+      <p class="footer__desc">
+        A curated shelf of India's homegrown makers — creators, designers and artists
+        we've met, vetted and stand behind.
+      </p>
+      <ul class="footer__social">
+        <li><a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><circle cx="17.5" cy="6.5" r="1"/></svg></a></li>
+        <li><a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a></li>
+        <li><a href="https://maps.google.com/?q=Alt.Tribe,+M9+Market,+Block+M,+Greater+Kailash+II,+New+Delhi+110048" target="_blank" rel="noopener" aria-label="Find our store"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></a></li>
+        <li><a href="mailto:Partnerships@alt-tribe.in" aria-label="Email"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg></a></li>
+      </ul>
+      </details>
+    </div>
+
+    <div class="footer__grid">
+      <details class="footer__col" open>
+        <summary class="footer__heading">Work With Us<svg class="footer__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <ul>
+          <li><a href="https://forms.gle/8iwsiXAjbwh27qg49" target="_blank" rel="noopener">Display your products</a></li>
+          <li><a href="https://forms.gle/jw35e8kQUmg2R9fV9" target="_blank" rel="noopener">Host a workshop</a></li>
+          <li><a href="https://wa.me/919818312545?countryCode=91" target="_blank" rel="noopener">WhatsApp us</a></li>
+        </ul>
+      </details>
+
+      <details class="footer__col" open>
+        <summary class="footer__heading">Reach Us<svg class="footer__chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <ul>
+          <li><a href="mailto:Partnerships@alt-tribe.in">Partnerships@alt-tribe.in</a></li>
+          <li><a href="tel:+919871214408">+91 98712 14408</a></li>
+          <li><span class="footer__note">Monday – Sunday, 12:00 PM – 9:00 PM</span></li>
+          <li><span class="footer__note">M9, Market, Block M,<br />Greater Kailash II, New Delhi 110048</span></li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+
+  <div class="footer__bottom">
+    <p class="footer__copy">© <span id="year"></span> Alt.Tribe. All rights reserved.</p>
+    <ul class="footer__legal">
+      <li><a href="#">Privacy Policy</a></li>
+      <li><a href="#">Terms &amp; Conditions</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+  /* Loading screen: reveal as soon as the page is usable. The hero video
+     keeps buffering behind the scenes and shows its poster meanwhile, so
+     a slow connection never blocks entry. The timeout is a safety net —
+     if `load` is delayed or never fires, the overlay still clears.     */
+  (() => {
+    const boot = document.getElementById('boot');
+    if (!boot) return;
+    let cleared = false;
+    const clear = () => {
+      if (cleared) return;
+      cleared = true;
+      boot.classList.add('is-done');
+      setTimeout(() => boot.remove(), 600);
+    };
+    if (document.readyState === 'complete') clear();
+    else window.addEventListener('load', clear, { once: true });
+    setTimeout(clear, 8000);
+  })();
+
+  const toggle = document.querySelector('.nav__toggle');
+  const links = document.getElementById('nav-links');
+  const mobile = window.matchMedia('(max-width: 760px)');
+
+  const sync = () => {
+    links.hidden = mobile.matches;
+    toggle.setAttribute('aria-expanded', 'false');
+    document.querySelector('.nav').classList.remove('is-open');
+  };
+  sync();
+  mobile.addEventListener('change', sync);
+
+  const navBar = document.querySelector('.nav');
+  const setMenu = (open) => {
+    links.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+    navBar.classList.toggle('is-open', open);
+  };
+
+  toggle.addEventListener('click', () => setMenu(links.hidden));
+
+  // Tapping a destination closes the menu so the page isn't left covered.
+  links.addEventListener('click', (e) => {
+    if (mobile.matches && e.target.closest('.nav__btn')) setMenu(false);
+  });
+
+  // Tap anywhere outside, or press Escape, to dismiss.
+  document.addEventListener('click', (e) => {
+    if (!mobile.matches || links.hidden) return;
+    if (!links.contains(e.target) && !toggle.contains(e.target)) setMenu(false);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobile.matches && !links.hidden) {
+      setMenu(false);
+      toggle.focus();
+    }
+  });
+
+  // Glider: white pill that slides between links inside the cylinder.
+  const glider = links.querySelector('.nav__glider');
+  const navBtns = [...links.querySelectorAll('.nav__btn')];
+
+  const moveGlider = (btn) => {
+    glider.style.setProperty('--x', btn.offsetLeft + 'px');
+    glider.style.setProperty('--w', btn.offsetWidth + 'px');
+    links.dataset.active = '';
+  };
+
+  navBtns.forEach((btn) => {
+    btn.addEventListener('pointerenter', () => moveGlider(btn));
+    btn.addEventListener('focus', () => moveGlider(btn));
+  });
+
+  links.addEventListener('pointerleave', () => delete links.dataset.active);
+  links.addEventListener('focusout', (e) => {
+    if (!links.contains(e.relatedTarget)) delete links.dataset.active;
+  });
+
+  // Split nav labels into per-letter spans, delay staggered outward from the centre.
+  const STAGGER_MS = 30;
+
+  document.querySelectorAll('.nav__btn').forEach((btn) => {
+    const label = btn.textContent.trim();
+    const mid = (label.length - 1) / 2;
+
+    btn.setAttribute('aria-label', label);
+    btn.textContent = '';
+
+    [...label].forEach((char, i) => {
+      const span = document.createElement('span');
+      span.className = char === ' ' ? 'ch ch--space' : 'ch';
+      span.setAttribute('aria-hidden', 'true');
+      span.textContent = char === ' ' ? ' ' : char;
+      if (char !== ' ') span.dataset.ch = char;
+      span.style.setProperty('--d', Math.abs(mid - i) * STAGGER_MS);
+      btn.appendChild(span);
+    });
+  });
+
+  /* Footer columns: accordions on phones (collapsed by default), plain
+     always-open lists on wider screens. Markup ships `open` so the links
+     are present for crawlers and for no-JS visitors. */
+  (() => {
+    const cols = [...document.querySelectorAll('.footer__col')];
+    if (!cols.length) return;
+
+    const small = window.matchMedia('(max-width: 620px)');
+    const sync = () => cols.forEach(c => { c.open = !small.matches; });
+
+    sync();
+    small.addEventListener('change', sync);
+  })();
+
+  const yearEl = document.getElementById('year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
