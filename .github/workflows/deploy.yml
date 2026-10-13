@@ -28,7 +28,7 @@ jobs:
           cache: npm
           cache-dependency-path: alt-tribe-app/package-lock.json
       - run: npm ci
-      - run: npm run build -- --base=/Alt.tribe/
+      - run: npm run build -- --base=/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: alt-tribe-app/dist
