@@ -144,8 +144,9 @@ section.pad{padding:clamp(80px,11vw,150px) 0;position:relative}
 .collage:hover img:nth-child(2){transform:rotate(4deg) translateY(-8px)}
 .collage:hover img:nth-child(3){transform:rotate(-4deg)}
 .collage:hover img:nth-child(4){transform:rotate(5deg)}
-.mask{clip-path:inset(0 0 100% 0);transition:clip-path 1.2s var(--ease)}
-.mask.in{clip-path:inset(0)}
+.mask{opacity:0;transform:translateY(34px) scale(.97);transition:opacity 1s var(--ease),transform 1.2s var(--ease)}
+.mask.in{opacity:1;transform:none}
+.collage img.mask{transition:opacity 1s var(--ease),transform .6s var(--ease)}
 
 /* founder */
 .founder-sec{background:var(--blush);overflow:hidden}
@@ -884,6 +885,17 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{
   e.target.querySelectorAll('[data-count]').forEach(count);
 }),{threshold:.15});
 $$('.rv,.mask').forEach(el=>io.observe(el));
+/* safety net: some mobile browsers never report intersection for hidden elements, so reveal anything near the viewport on scroll/load */
+function revealNear(){
+  $$('.rv:not(.in),.mask:not(.in)').forEach(el=>{
+    const r=el.getBoundingClientRect();
+    if(r.top<innerHeight*1.05&&r.bottom>0){el.classList.add('in');io.unobserve(el);el.querySelectorAll('[data-count]').forEach(count)}
+  });
+}
+addEventListener('scroll',revealNear,{passive:true});
+addEventListener('resize',revealNear);
+addEventListener('load',revealNear);
+setTimeout(revealNear,800);
 function count(el){
   const to=+el.dataset.count,t0=performance.now(),d=1600;
   (function f(t){const p=Math.min((t-t0)/d,1);el.textContent=Math.round(to*(1-Math.pow(1-p,4)));if(p<1)requestAnimationFrame(f)})(t0);
