@@ -118,7 +118,7 @@ h2 em{color:var(--pink);font-style:italic;font-weight:400}
 /* marquee */
 .marq{background:var(--pink);color:#fff;overflow:hidden;padding:22px 0;width:100%;position:relative;z-index:5}
 .marq .t{display:inline-flex;white-space:nowrap;animation:tick 22s linear infinite}
-.marq span{font-family:var(--serif);font-size:clamp(1.3rem,2.6vw,2rem);font-style:italic;padding-right:3rem}
+.marq span{font-family:var(--sans);font-weight:700;font-size:clamp(1rem,1.9vw,1.45rem);letter-spacing:.14em;text-transform:uppercase;padding-right:3rem}
 .marq span::after{content:"✦";margin-left:3rem;color:var(--cream);font-style:normal}
 @keyframes tick{to{transform:translateX(-50%)}}
 .marq:hover .t{animation-play-state:paused}
