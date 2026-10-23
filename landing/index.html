@@ -501,6 +501,14 @@ section.gal-sec.pad{padding-top:clamp(24px,3.5vw,48px)}
 .nav ul{gap:clamp(1rem,2vw,2rem)}
 .nav ul a{white-space:nowrap}
 
+.nav .btn{white-space:nowrap}
+/* the menu has long labels, so switch to the burger menu earlier */
+@media (max-width:1120px){
+  .nav ul,.nav .btn{display:none}
+  .burger{display:block}
+  .nav.open ul{display:grid;position:absolute;top:calc(100% + 10px);left:14px;right:14px;background:var(--cream);padding:24px;border-radius:26px;gap:1.1rem;box-shadow:0 20px 50px rgba(90,29,60,.25)}
+}
+
 /* why : stacking cards */
 .why-sec{background:var(--blush)}
 .why-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(30px,6vw,90px)}
@@ -616,7 +624,7 @@ section.gal-sec.pad{padding-top:clamp(24px,3.5vw,48px)}
     <ul>
       <li><a href="#about">About</a></li>
       <li><a href="#founder">Founder’s Journey</a></li>
-      <li><a href="#brands">Brands</a></li>
+      <li><a href="#brands">What we Create</a></li>
       <li><a href="#why">For Brands</a></li>
       <li><a href="#social">Community</a></li>
       <li><a href="#contact">Partner with us</a></li>
