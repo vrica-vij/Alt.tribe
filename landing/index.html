@@ -509,6 +509,26 @@ section.gal-sec.pad{padding-top:clamp(24px,3.5vw,48px)}
   .nav.open ul{display:grid;position:absolute;top:calc(100% + 10px);left:14px;right:14px;background:var(--cream);padding:24px;border-radius:26px;gap:1.1rem;box-shadow:0 20px 50px rgba(90,29,60,.25)}
 }
 
+/* phones: text sits on the hero photo; shorter hero so less of the photo is cropped, smaller text */
+@media (max-width:700px){
+  .hero{min-height:0;height:calc(84px + 118vw);max-height:88svh;background:var(--berry)}
+  .hero .hero-img{transform:none!important;object-position:40% center}
+  .hero .wrap{padding:0 0 28px}
+  .hero .eyebrow{font-size:.66rem;letter-spacing:.14em}
+  .hero h1{font-size:clamp(2.1rem,10.5vw,2.8rem);line-height:1;margin-top:.6rem;text-shadow:0 2px 18px rgba(60,15,40,.75),0 1px 3px rgba(60,15,40,.6)}
+  .hero .eyebrow,.hero .sub span{text-shadow:0 1px 10px rgba(60,15,40,.8),0 1px 2px rgba(60,15,40,.6)}
+  .hero .sub{margin:.9rem 0 1.1rem}
+  .hero .sub span{font-size:.95rem;padding-right:1.6rem}
+  .hero .sub span::after{margin-left:1.6rem}
+  .hero .row .btn{padding:.8rem 1.35rem;font-size:.88rem}
+}
+
+/* phones: smaller floating button, hidden while the hero is on screen so it never covers the headline */
+@media (max-width:700px){
+  .fab{padding:.7rem 1.05rem;font-size:.7rem;right:14px;bottom:14px;opacity:0;pointer-events:none;transform:translateY(16px);transition:opacity .35s,transform .35s,background .3s}
+  .fab.show{opacity:1;pointer-events:auto;transform:none}
+}
+
 /* why : stacking cards */
 .why-sec{background:var(--blush)}
 .why-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(30px,6vw,90px)}
@@ -897,6 +917,10 @@ function onScroll(){
   ticking=false;
 }
 addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(onScroll)}},{passive:true});
+/* floating button appears once the hero has been scrolled past (only hidden on phones, see CSS) */
+const fab=$('.fab'),heroEl=$('.hero');
+function fabToggle(){fab.classList.toggle('show',scrollY>heroEl.offsetHeight*0.6)}
+addEventListener('scroll',fabToggle,{passive:true});fabToggle();
 
 /* mobile menu */
 $('#burger').onclick=()=>nav.classList.toggle('open');
