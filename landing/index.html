@@ -522,6 +522,12 @@ section.gal-sec.pad{padding-top:clamp(24px,3.5vw,48px)}
   .hero .row .btn{padding:.85rem 1.4rem;font-size:.9rem}
 }
 
+/* phones: smaller floating button, hidden while the hero is on screen so it never covers the headline */
+@media (max-width:700px){
+  .fab{padding:.7rem 1.05rem;font-size:.7rem;right:14px;bottom:14px;opacity:0;pointer-events:none;transform:translateY(16px);transition:opacity .35s,transform .35s,background .3s}
+  .fab.show{opacity:1;pointer-events:auto;transform:none}
+}
+
 /* why : stacking cards */
 .why-sec{background:var(--blush)}
 .why-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(30px,6vw,90px)}
@@ -910,6 +916,10 @@ function onScroll(){
   ticking=false;
 }
 addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(onScroll)}},{passive:true});
+/* floating button appears once the hero has been scrolled past (only hidden on phones, see CSS) */
+const fab=$('.fab'),heroEl=$('.hero');
+function fabToggle(){fab.classList.toggle('show',scrollY>heroEl.offsetHeight*0.6)}
+addEventListener('scroll',fabToggle,{passive:true});fabToggle();
 
 /* mobile menu */
 $('#burger').onclick=()=>nav.classList.toggle('open');
