@@ -509,6 +509,19 @@ section.gal-sec.pad{padding-top:clamp(24px,3.5vw,48px)}
   .nav.open ul{display:grid;position:absolute;top:calc(100% + 10px);left:14px;right:14px;background:var(--cream);padding:24px;border-radius:26px;gap:1.1rem;box-shadow:0 20px 50px rgba(90,29,60,.25)}
 }
 
+/* phones: show the whole hero photo (no heavy crop) with smaller text on a berry panel below it */
+@media (max-width:700px){
+  .hero{display:block;min-height:0;padding-top:84px;background:var(--berry)}
+  .hero .hero-img{position:relative;inset:auto;display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;object-position:center;transform:none!important}
+  .hero .wrap{padding:26px 0 40px}
+  .hero .eyebrow{font-size:.68rem;letter-spacing:.14em}
+  .hero h1{font-size:clamp(2.3rem,11.5vw,3.1rem);line-height:1;margin-top:.7rem}
+  .hero .sub{margin:1.1rem 0 1.4rem}
+  .hero .sub span{font-size:.98rem;padding-right:1.6rem}
+  .hero .sub span::after{margin-left:1.6rem}
+  .hero .row .btn{padding:.85rem 1.4rem;font-size:.9rem}
+}
+
 /* why : stacking cards */
 .why-sec{background:var(--blush)}
 .why-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(30px,6vw,90px)}
