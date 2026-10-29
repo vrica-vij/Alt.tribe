@@ -90,12 +90,10 @@ footer{padding:40px 0;color:var(--muted);font-size:.8rem;text-align:center}
     <section class="card">
       <div class="step"><div class="num">2</div><div>
         <h2>Your details</h2>
-        <p>So we know who the stock is from.</p>
+        <p>So we know which brand the stock is from.</p>
       </div></div>
       <div class="fields">
         <label>Brand name *<input type="text" id="brand" autocomplete="organization" placeholder="e.g. Indigo Threads"></label>
-        <label>Your name *<input type="text" id="person" autocomplete="name" placeholder="Full name"></label>
-        <label>Phone *<input type="tel" id="phone" autocomplete="tel" placeholder="10-digit mobile"></label>
         <label>Email<input type="email" id="email" autocomplete="email" placeholder="optional"></label>
       </div>
     </section>
@@ -187,7 +185,7 @@ async function handleFile(file) {
     return;
   }
   const s = check.summary;
-  out.innerHTML = `<div class="result good"><h3>✓ All ${s.products} products are correct</h3>
+  out.innerHTML = `<div class="result good"><h3>✓ ${s.products === 1 ? "Your product is" : "All " + s.products + " products are"} correct</h3>
     <p><b>${esc(file.name)}</b> passed every check. Review it below, then send it to Alt.Tribe.</p>
     <div class="stats"><div class="stat"><b>${s.products}</b>products</div><div class="stat"><b>${s.units.toLocaleString("en-IN")}</b>units</div><div class="stat"><b>${INV.formatINR(s.value)}</b>total MRP value</div></div>
     <div class="tbl"><table><tr><th>#</th>${INV.COLUMNS.map((c) => `<th>${esc(c.label)}</th>`).join("")}</tr>
@@ -208,18 +206,16 @@ function toB64(buf) {
 
 async function send() {
   const msg = $("#sendMsg"), btn = $("#sendBtn");
-  const brand = $("#brand").value.trim(), person = $("#person").value.trim(), phone = $("#phone").value.trim(), email = $("#email").value.trim();
+  const brand = $("#brand").value.trim(), email = $("#email").value.trim();
   const missing = [];
-  if (brand.length < 2) missing.push("brand name");
-  if (person.length < 2) missing.push("your name");
-  if (!/^[+\d][\d\s-]{8,15}$/.test(phone)) missing.push("a valid phone number");
+  if (brand.length < 2) missing.push("your brand name");
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) missing.push("a valid email (or leave it empty)");
   if (missing.length) { msg.innerHTML = `<div class="notice">Please add ${missing.join(", ")} in step 2.</div>`; $("#brand").scrollIntoView({ behavior: "smooth", block: "center" }); return; }
   if (!current) return;
   btn.disabled = true; btn.textContent = "Sending…";
   try {
     const r = await INV.call({
-      action: "submit", brand, person, phone, email,
+      action: "submit", brand, email,
       fileName: current.fileName, mime: current.file.type || "application/octet-stream", fileB64: toB64(current.buf),
       summary: current.check.summary,
       columns: INV.COLUMNS.map((c) => ({ key: c.key, label: c.label })),
@@ -227,7 +223,7 @@ async function send() {
     });
     $("#flow").classList.add("hide");
     $("#done").classList.remove("hide");
-    $("#doneText").innerHTML = `Thank you, ${esc(person)}! We've received <b>${current.check.summary.products} products</b> from <b>${esc(brand)}</b>.<br>Reference: <b>${esc(r.id)}</b>. Our team will review it and get back to you.`;
+    $("#doneText").innerHTML = `Thank you! We've received <b>${current.check.summary.products} product${current.check.summary.products === 1 ? "" : "s"}</b> from <b>${esc(brand)}</b>.<br>Reference: <b>${esc(r.id)}</b>. Our team will review it and get back to you.`;
     scrollTo({ top: 0, behavior: "smooth" });
   } catch (e) {
     btn.disabled = false; btn.textContent = "Send inventory to Alt.Tribe →";
