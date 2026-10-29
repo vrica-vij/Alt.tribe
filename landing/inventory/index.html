@@ -81,7 +81,7 @@ footer{padding:40px 0;color:var(--muted);font-size:.8rem;text-align:center}
     <section class="card">
       <div class="step"><div class="num">1</div><div>
         <h2>Download the template</h2>
-        <p>Fill your products in the <b>Inventory</b> sheet. Keep the column names exactly as they are.</p>
+        <p>Fill your products in the <b>first sheet</b>. Keep the column names exactly as they are — prices are <b>excluding GST</b>.</p>
       </div></div>
       <div class="row"><button class="btn ghost" id="tplBtn">⬇ Download Excel template</button></div>
       <details class="rules"><summary>See the rules for each column</summary><div class="tbl"><table id="rulesTbl"></table></div></details>
@@ -136,15 +136,16 @@ $("#tplBtn").onclick = () => {
   const wb = XLSX.utils.book_new();
   const head = INV.COLUMNS.map((c) => c.label);
   const ex = INV.COLUMNS.map((c) => c.example);
-  const ws = XLSX.utils.aoa_to_sheet([head, ex]);
+  const prefill = INV.COLUMNS.map((c) => (c.type === "fixed" && c.values.length === 1 ? c.values[0] : ""));
+  const blanks = Array.from({ length: 48 }, () => prefill.slice());
+  const ws = XLSX.utils.aoa_to_sheet([head, ex, ...blanks]);
   ws["!cols"] = INV.COLUMNS.map((c) => ({ wch: Math.max(12, c.label.length + 4) }));
-  XLSX.utils.book_append_sheet(wb, ws, INV.SHEET_NAME);
+  XLSX.utils.book_append_sheet(wb, ws, "Inventory");
   const rules = [["Column", "Required", "Rule"], ...INV.COLUMNS.map((c) => [c.label, c.required ? "Yes" : "Optional", c.help])];
-  rules.push([], ["Note", "", "Row 2 is an example – replace it with your own products. Do not rename, add or remove columns."]);
+  rules.push([], ["Note", "", "Row 2 is an example – replace it with your own products. Keep your products on the FIRST sheet. Do not rename, add or remove columns."]);
   const wr = XLSX.utils.aoa_to_sheet(rules);
   wr["!cols"] = [{ wch: 16 }, { wch: 10 }, { wch: 90 }];
   XLSX.utils.book_append_sheet(wb, wr, "How to fill");
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Categories"], ...INV.CATEGORIES.map((c) => [c])]), "Categories");
   XLSX.writeFile(wb, "AltTribe-Inventory-Template.xlsx");
 };
 
@@ -164,8 +165,7 @@ async function handleFile(file) {
   try {
     const buf = await file.arrayBuffer();
     const wb = XLSX.read(buf, { type: "array" });
-    const sheetName = wb.SheetNames.find((n) => n.trim().toLowerCase() === INV.SHEET_NAME.toLowerCase()) || wb.SheetNames[0];
-    rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, raw: true, defval: "" });
+    rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, raw: true, defval: "" }); // first sheet only
     current = { file, fileName: file.name, buf };
   } catch (e) {
     out.innerHTML = bad("We couldn't read this file", "Please upload the Excel template (.xlsx) or a .csv file.");
@@ -187,9 +187,9 @@ async function handleFile(file) {
   const s = check.summary;
   out.innerHTML = `<div class="result good"><h3>✓ ${s.products === 1 ? "Your product is" : "All " + s.products + " products are"} correct</h3>
     <p><b>${esc(file.name)}</b> passed every check. Review it below, then send it to Alt.Tribe.</p>
-    <div class="stats"><div class="stat"><b>${s.products}</b>products</div><div class="stat"><b>${s.units.toLocaleString("en-IN")}</b>units</div><div class="stat"><b>${INV.formatINR(s.value)}</b>total MRP value</div></div>
+    <div class="stats"><div class="stat"><b>${s.products}</b>products</div><div class="stat"><b>${s.units.toLocaleString("en-IN")}</b>units</div><div class="stat"><b>${INV.formatINR(s.value)}</b>total value (excl. GST)</div></div>
     <div class="tbl"><table><tr><th>#</th>${INV.COLUMNS.map((c) => `<th>${esc(c.label)}</th>`).join("")}</tr>
-    ${check.products.slice(0, 200).map((p, i) => `<tr><td>${i + 1}</td>${INV.COLUMNS.map((c) => `<td>${esc(c.key === "mrp" ? INV.formatINR(p[c.key]) : p[c.key])}</td>`).join("")}</tr>`).join("")}
+    ${check.products.slice(0, 200).map((p, i) => `<tr><td>${i + 1}</td>${INV.COLUMNS.map((c) => `<td>${esc(INV.isMoney(c.key) ? INV.formatINR(p[c.key]) : p[c.key])}</td>`).join("")}</tr>`).join("")}
     </table></div>${s.products > 200 ? `<p>Showing the first 200 of ${s.products}.</p>` : ""}
     <div class="row"><button class="btn" id="sendBtn">Send inventory to Alt.Tribe →</button></div>
     <div id="sendMsg"></div></div>`;

@@ -121,7 +121,7 @@ function renderList() {
   document.querySelectorAll(".tab").forEach((b) => (b.onclick = () => { filter = b.dataset.t; renderList(); }));
   const rows = subs.filter((s) => filter === "All" || s.status === filter);
   if (!rows.length) { $("#list").innerHTML = `<div class="empty">Nothing here yet.</div>`; return; }
-  $("#list").innerHTML = `<table><tr><th>Submitted</th><th>Brand</th><th>Products</th><th>Units</th><th>MRP value</th><th>Email</th><th>Status</th><th>Reviewed</th></tr>
+  $("#list").innerHTML = `<table><tr><th>Submitted</th><th>Brand</th><th>Products</th><th>Units</th><th>Value (excl. GST)</th><th>Email</th><th>Status</th><th>Reviewed</th></tr>
     ${rows.map((s) => `<tr class="click" data-id="${esc(s.id)}"><td>${fmtDate(s.submittedAt)}</td><td><b>${esc(s.brand)}</b></td><td>${esc(s.products)}</td><td>${esc(s.units)}</td><td>${INV.formatINR(s.value)}</td><td>${esc(s.email || "—")}</td><td><span class="pill ${esc(s.status)}">${esc(s.status)}</span></td><td>${fmtDate(s.reviewedAt)}${s.reviewer ? "<br><small>by " + esc(s.reviewer) + "</small>" : ""}</td></tr>`).join("")}</table>`;
   document.querySelectorAll("tr.click").forEach((tr) => (tr.onclick = () => openDetail(tr.dataset.id)));
 }
@@ -135,9 +135,9 @@ async function openDetail(id) {
   $("#detail").innerHTML = `
     <h1>${esc(s.brand)} <span class="pill ${esc(s.status)}" style="vertical-align:middle">${esc(s.status)}</span></h1>
     <p class="meta">Ref ${esc(s.id)} · submitted ${fmtDate(s.submittedAt)}${s.email ? " · " + esc(s.email) : ""} · file <b>${esc(s.fileName)}</b>${s.fileUrl ? ` · <a href="${esc(s.fileUrl)}" target="_blank" rel="noopener">open original Excel</a>` : ""}</p>
-    <div class="stats"><div class="stat"><b>${esc(s.products)}</b>products</div><div class="stat"><b>${esc(s.units)}</b>units</div><div class="stat"><b>${INV.formatINR(s.value)}</b>MRP value</div></div>
+    <div class="stats"><div class="stat"><b>${esc(s.products)}</b>products</div><div class="stat"><b>${esc(s.units)}</b>units</div><div class="stat"><b>${INV.formatINR(s.value)}</b>value (excl. GST)</div></div>
     <div class="tbl"><table><tr><th>#</th>${cols.map((c) => `<th>${esc(c.label)}</th>`).join("")}</tr>
-      ${prods.map((p, i) => `<tr><td>${i + 1}</td>${cols.map((c) => `<td>${esc(c.key === "mrp" ? INV.formatINR(p[c.key]) : p[c.key])}</td>`).join("")}</tr>`).join("")}</table></div>
+      ${prods.map((p, i) => `<tr><td>${i + 1}</td>${cols.map((c) => `<td>${esc(INV.isMoney(c.key) ? INV.formatINR(p[c.key]) : p[c.key])}</td>`).join("")}</tr>`).join("")}</table></div>
     ${s.status === "Pending" ? `
     <div class="actions">
       <label>Your name *<input id="reviewer" placeholder="Who is approving"></label>
