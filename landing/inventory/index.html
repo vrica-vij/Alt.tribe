@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Inventory Upload — Alt.Tribe</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="config.js"></script>
+<style>
+:root{--pink:#b74d79;--pink-deep:#a1406a;--pink-soft:#e9b9cb;--blush:#f7e3ea;--cream:#f3ead8;--sand:#e7dccb;--gold:#b8912a;--berry:#7a2a4f;--plum:#5a1d3c;--ink:#4a1830;--muted:#8b6a78;--ok:#2f7d4f;--ok-bg:#e6f3ea;--bad:#b3261e;--bad-bg:#fbe9e7;
+  --sans:"Bricolage Grotesque",Helvetica,Arial,sans-serif;--serif:Fraunces,Georgia,serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--cream);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--pink)}
+.wrap{width:min(860px,100% - 32px);margin:0 auto}
+header{padding:28px 0 8px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+header img{height:32px}
+header span{font-size:.75rem;letter-spacing:.16em;font-weight:700;color:var(--muted);text-transform:uppercase}
+h1{font-family:var(--serif);font-weight:700;font-size:clamp(2rem,5vw,3rem);line-height:1.05;color:var(--plum);margin:28px 0 10px;letter-spacing:-.02em}
+h1 em{font-weight:500;color:var(--pink)}
+.lead{color:var(--muted);font-size:1.05rem;max-width:60ch}
+.card{background:#fff;border-radius:24px;padding:clamp(20px,4vw,32px);margin-top:20px;box-shadow:0 18px 40px rgba(122,42,79,.08)}
+.step{display:flex;gap:14px;align-items:flex-start}
+.num{flex:none;width:34px;height:34px;border-radius:50%;background:var(--pink);color:#fff;display:grid;place-items:center;font-weight:800}
+.step h2{font-family:var(--serif);font-size:1.35rem;color:var(--plum);line-height:1.2}
+.step p{color:var(--muted);font-size:.95rem;margin-top:4px}
+.btn{display:inline-flex;align-items:center;gap:.5rem;border:0;cursor:pointer;background:var(--pink);color:#fff;font:700 .95rem var(--sans);padding:.85rem 1.4rem;border-radius:999px;transition:background .2s,transform .2s}
+.btn:hover{background:var(--berry);transform:translateY(-2px)}
+.btn:disabled{background:#d8c9cf;cursor:not-allowed;transform:none}
+.btn.ghost{background:var(--blush);color:var(--berry)}
+.btn.ghost:hover{background:var(--pink-soft)}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+label{display:grid;gap:6px;font-size:.85rem;font-weight:700;color:var(--plum)}
+input[type=text],input[type=tel],input[type=email]{font:500 1rem var(--sans);padding:.8rem 1rem;border:1.5px solid var(--sand);border-radius:14px;background:#fffdf9;color:var(--ink)}
+input:focus{outline:2px solid var(--pink-soft);border-color:var(--pink)}
+.drop{margin-top:16px;border:2px dashed var(--pink-soft);border-radius:20px;padding:34px 20px;text-align:center;background:var(--blush);cursor:pointer;transition:background .2s,border-color .2s}
+.drop.over{background:#f2d3df;border-color:var(--pink)}
+.drop b{display:block;font-family:var(--serif);font-size:1.25rem;color:var(--plum)}
+.drop small{color:var(--muted)}
+.rules{margin-top:14px;font-size:.88rem;color:var(--muted)}
+.rules summary{cursor:pointer;font-weight:700;color:var(--berry)}
+.rules table{margin-top:10px}
+.result{margin-top:20px;border-radius:20px;padding:20px}
+.result.bad{background:var(--bad-bg);color:var(--bad)}
+.result.good{background:var(--ok-bg);color:var(--ok)}
+.result h3{font-family:var(--serif);font-size:1.4rem;line-height:1.2}
+.result p{color:var(--ink);margin-top:6px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.stat{background:#fff;border-radius:14px;padding:10px 14px;color:var(--ink);font-size:.85rem}
+.stat b{display:block;font-family:var(--serif);font-size:1.4rem;color:var(--plum)}
+.tbl{margin-top:14px;max-height:420px;overflow:auto;border-radius:14px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:.85rem;color:var(--ink)}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #f0e6ea;white-space:nowrap}
+th{position:sticky;top:0;background:var(--blush);color:var(--plum);font-weight:800;z-index:1}
+td.err{color:var(--bad);white-space:normal;min-width:220px}
+.notice{margin-top:16px;padding:12px 16px;border-radius:14px;background:#fff6dc;color:#7a5b00;font-size:.9rem}
+.done{text-align:center;padding:40px 20px}
+.done .tick{width:74px;height:74px;border-radius:50%;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:2rem;margin:0 auto 14px}
+.hide{display:none!important}
+footer{padding:40px 0;color:var(--muted);font-size:.8rem;text-align:center}
+@media (max-width:620px){.fields{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="/assets/alt-logo.avif" alt="Alt.Tribe">
+    <span>Brand inventory upload</span>
+  </header>
+
+  <h1>Send us your <em>inventory.</em></h1>
+  <p class="lead">Upload your stock list in the Alt.Tribe format. We check every product instantly — only a fully correct file can be sent, so nothing gets lost or mixed up at the store.</p>
+
+  <div id="flow">
+    <section class="card">
+      <div class="step"><div class="num">1</div><div>
+        <h2>Download the template</h2>
+        <p>Fill your products in the <b>Inventory</b> sheet. Keep the column names exactly as they are.</p>
+      </div></div>
+      <div class="row"><button class="btn ghost" id="tplBtn">⬇ Download Excel template</button></div>
+      <details class="rules"><summary>See the rules for each column</summary><div class="tbl"><table id="rulesTbl"></table></div></details>
+    </section>
+
+    <section class="card">
+      <div class="step"><div class="num">2</div><div>
+        <h2>Your details</h2>
+        <p>So we know who the stock is from.</p>
+      </div></div>
+      <div class="fields">
+        <label>Brand name *<input type="text" id="brand" autocomplete="organization" placeholder="e.g. Indigo Threads"></label>
+        <label>Your name *<input type="text" id="person" autocomplete="name" placeholder="Full name"></label>
+        <label>Phone *<input type="tel" id="phone" autocomplete="tel" placeholder="10-digit mobile"></label>
+        <label>Email<input type="email" id="email" autocomplete="email" placeholder="optional"></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="step"><div class="num">3</div><div>
+        <h2>Upload your file</h2>
+        <p>.xlsx, .xls or .csv · we check it right here before anything is sent.</p>
+      </div></div>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose inventory file">
+        <b>Drop your Excel here</b><small>or click to choose a file</small>
+      </div>
+      <input type="file" id="file" accept=".xlsx,.xls,.csv" class="hide">
+      <div id="result"></div>
+    </section>
+  </div>
+
+  <section class="card done hide" id="done">
+    <div class="tick">✓</div>
+    <h1 style="margin-top:0">Inventory sent</h1>
+    <p class="lead" style="margin:0 auto" id="doneText"></p>
+    <div class="row" style="justify-content:center"><button class="btn ghost" onclick="location.reload()">Upload another file</button></div>
+  </section>
+
+  <footer>Alt.Tribe · M9, Market, Block M, Greater Kailash II, New Delhi · partnerships@alt-tribe.in</footer>
+</div>
+
+<script>
+const INV = window.INV;
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let current = null; // { file, fileName, b64, check }
+
+/* rules table */
+$("#rulesTbl").innerHTML = "<tr><th>Column</th><th>Required</th><th>Rule</th></tr>" +
+  INV.COLUMNS.map((c) => `<tr><td><b>${esc(c.label)}</b></td><td>${c.required ? "Yes" : "Optional"}</td><td style="white-space:normal">${esc(c.help)}</td></tr>`).join("");
+
+/* template download */
+$("#tplBtn").onclick = () => {
+  const wb = XLSX.utils.book_new();
+  const head = INV.COLUMNS.map((c) => c.label);
+  const ex = INV.COLUMNS.map((c) => c.example);
+  const ws = XLSX.utils.aoa_to_sheet([head, ex]);
+  ws["!cols"] = INV.COLUMNS.map((c) => ({ wch: Math.max(12, c.label.length + 4) }));
+  XLSX.utils.book_append_sheet(wb, ws, INV.SHEET_NAME);
+  const rules = [["Column", "Required", "Rule"], ...INV.COLUMNS.map((c) => [c.label, c.required ? "Yes" : "Optional", c.help])];
+  rules.push([], ["Note", "", "Row 2 is an example – replace it with your own products. Do not rename, add or remove columns."]);
+  const wr = XLSX.utils.aoa_to_sheet(rules);
+  wr["!cols"] = [{ wch: 16 }, { wch: 10 }, { wch: 90 }];
+  XLSX.utils.book_append_sheet(wb, wr, "How to fill");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Categories"], ...INV.CATEGORIES.map((c) => [c])]), "Categories");
+  XLSX.writeFile(wb, "AltTribe-Inventory-Template.xlsx");
+};
+
+/* file picking */
+const drop = $("#drop"), fileIn = $("#file");
+drop.onclick = () => fileIn.click();
+drop.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileIn.click(); } };
+drop.ondragover = (e) => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove("over"); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); };
+fileIn.onchange = () => { if (fileIn.files[0]) handleFile(fileIn.files[0]); fileIn.value = ""; };
+
+async function handleFile(file) {
+  const out = $("#result");
+  if (file.size > 10 * 1024 * 1024) { out.innerHTML = bad("File is too large", "Please keep it under 10 MB."); return; }
+  let rows;
+  try {
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array" });
+    const sheetName = wb.SheetNames.find((n) => n.trim().toLowerCase() === INV.SHEET_NAME.toLowerCase()) || wb.SheetNames[0];
+    rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, raw: true, defval: "" });
+    current = { file, fileName: file.name, buf };
+  } catch (e) {
+    out.innerHTML = bad("We couldn't read this file", "Please upload the Excel template (.xlsx) or a .csv file.");
+    current = null;
+    return;
+  }
+  const check = INV.validate(rows);
+  current.check = check;
+  if (!check.ok) {
+    current = null;
+    const prodRows = new Set(check.errors.map((e) => e.row)).size;
+    out.innerHTML = `<div class="result bad"><h3>File not accepted — ${check.errors.length} problem${check.errors.length > 1 ? "s" : ""} found</h3>
+      <p>Please fix everything listed below in your Excel and upload it again. Nothing has been sent.</p>
+      <div class="tbl"><table><tr><th>Row</th><th>Column</th><th>Problem</th><th>What you entered</th></tr>
+      ${check.errors.slice(0, 400).map((e) => `<tr><td>${esc(e.row)}</td><td>${esc(e.column)}</td><td class="err">${esc(e.message)}</td><td>${esc(e.value)}</td></tr>`).join("")}
+      </table></div>${check.errors.length > 400 ? `<p>…and ${check.errors.length - 400} more.</p>` : ""}</div>`;
+    return;
+  }
+  const s = check.summary;
+  out.innerHTML = `<div class="result good"><h3>✓ All ${s.products} products are correct</h3>
+    <p><b>${esc(file.name)}</b> passed every check. Review it below, then send it to Alt.Tribe.</p>
+    <div class="stats"><div class="stat"><b>${s.products}</b>products</div><div class="stat"><b>${s.units.toLocaleString("en-IN")}</b>units</div><div class="stat"><b>${INV.formatINR(s.value)}</b>total MRP value</div></div>
+    <div class="tbl"><table><tr><th>#</th>${INV.COLUMNS.map((c) => `<th>${esc(c.label)}</th>`).join("")}</tr>
+    ${check.products.slice(0, 200).map((p, i) => `<tr><td>${i + 1}</td>${INV.COLUMNS.map((c) => `<td>${esc(c.key === "mrp" ? INV.formatINR(p[c.key]) : p[c.key])}</td>`).join("")}</tr>`).join("")}
+    </table></div>${s.products > 200 ? `<p>Showing the first 200 of ${s.products}.</p>` : ""}
+    <div class="row"><button class="btn" id="sendBtn">Send inventory to Alt.Tribe →</button></div>
+    <div id="sendMsg"></div></div>`;
+  $("#sendBtn").onclick = send;
+}
+
+function bad(title, text) { return `<div class="result bad"><h3>${esc(title)}</h3><p>${esc(text)}</p></div>`; }
+
+function toB64(buf) {
+  let bin = ""; const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+async function send() {
+  const msg = $("#sendMsg"), btn = $("#sendBtn");
+  const brand = $("#brand").value.trim(), person = $("#person").value.trim(), phone = $("#phone").value.trim(), email = $("#email").value.trim();
+  const missing = [];
+  if (brand.length < 2) missing.push("brand name");
+  if (person.length < 2) missing.push("your name");
+  if (!/^[+\d][\d\s-]{8,15}$/.test(phone)) missing.push("a valid phone number");
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) missing.push("a valid email (or leave it empty)");
+  if (missing.length) { msg.innerHTML = `<div class="notice">Please add ${missing.join(", ")} in step 2.</div>`; $("#brand").scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+  if (!current) return;
+  btn.disabled = true; btn.textContent = "Sending…";
+  try {
+    const r = await INV.call({
+      action: "submit", brand, person, phone, email,
+      fileName: current.fileName, mime: current.file.type || "application/octet-stream", fileB64: toB64(current.buf),
+      summary: current.check.summary,
+      columns: INV.COLUMNS.map((c) => ({ key: c.key, label: c.label })),
+      products: current.check.products.map(({ _row, ...p }) => p),
+    });
+    $("#flow").classList.add("hide");
+    $("#done").classList.remove("hide");
+    $("#doneText").innerHTML = `Thank you, ${esc(person)}! We've received <b>${current.check.summary.products} products</b> from <b>${esc(brand)}</b>.<br>Reference: <b>${esc(r.id)}</b>. Our team will review it and get back to you.`;
+    scrollTo({ top: 0, behavior: "smooth" });
+  } catch (e) {
+    btn.disabled = false; btn.textContent = "Send inventory to Alt.Tribe →";
+    msg.innerHTML = e.message === "NOT_CONNECTED"
+      ? `<div class="notice">This page isn't connected to Alt.Tribe's system yet, so the file can't be sent. Please email it to partnerships@alt-tribe.in for now.</div>`
+      : `<div class="notice">Couldn't send right now (${esc(e.message)}). Please try again in a minute, or email the file to partnerships@alt-tribe.in.</div>`;
+  }
+}
+</script>
+</body>
+</html>

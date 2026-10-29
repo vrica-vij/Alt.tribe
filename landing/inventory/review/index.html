@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Inventory Review — Alt.Tribe</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
+<script src="../config.js"></script>
+<style>
+:root{--pink:#b74d79;--pink-soft:#e9b9cb;--blush:#f7e3ea;--cream:#f3ead8;--sand:#e7dccb;--gold:#b8912a;--berry:#7a2a4f;--plum:#5a1d3c;--ink:#4a1830;--muted:#8b6a78;--ok:#2f7d4f;--ok-bg:#e6f3ea;--bad:#b3261e;--bad-bg:#fbe9e7;--wait:#8a6a00;--wait-bg:#fff6dc;
+  --sans:"Bricolage Grotesque",Helvetica,Arial,sans-serif;--serif:Fraunces,Georgia,serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--cream);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{width:min(1180px,100% - 32px);margin:0 auto}
+header{padding:24px 0;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+header img{height:30px}
+header .r{display:flex;gap:10px;align-items:center}
+h1{font-family:var(--serif);font-size:clamp(1.8rem,4vw,2.6rem);color:var(--plum);line-height:1.1;letter-spacing:-.02em}
+h1 em{color:var(--pink);font-weight:500}
+.card{background:#fff;border-radius:22px;padding:clamp(18px,3vw,28px);margin-top:18px;box-shadow:0 18px 40px rgba(122,42,79,.08)}
+.btn{display:inline-flex;align-items:center;gap:.4rem;border:0;cursor:pointer;background:var(--pink);color:#fff;font:700 .9rem var(--sans);padding:.7rem 1.2rem;border-radius:999px;transition:background .2s}
+.btn:hover{background:var(--berry)}
+.btn:disabled{background:#d8c9cf;cursor:not-allowed}
+.btn.ok{background:var(--ok)}.btn.ok:hover{background:#245f3c}
+.btn.no{background:#fff;color:var(--bad);box-shadow:inset 0 0 0 1.5px var(--bad)}.btn.no:hover{background:var(--bad-bg)}
+.btn.ghost{background:var(--blush);color:var(--berry)}
+input,textarea{font:500 1rem var(--sans);padding:.75rem 1rem;border:1.5px solid var(--sand);border-radius:12px;background:#fffdf9;color:var(--ink);width:100%}
+textarea{min-height:70px;resize:vertical}
+label{display:grid;gap:6px;font-size:.82rem;font-weight:700;color:var(--plum)}
+.gate{max-width:420px;margin:12vh auto 0;text-align:center}
+.gate p{color:var(--muted);margin:8px 0 18px}
+.gate form{display:grid;gap:12px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.tab{border:0;cursor:pointer;padding:.55rem 1rem;border-radius:999px;font:700 .85rem var(--sans);background:#fff;color:var(--berry)}
+.tab.on{background:var(--plum);color:#fff}
+.tbl{overflow:auto;border-radius:14px;margin-top:12px;max-height:560px}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #f0e6ea;white-space:nowrap}
+th{position:sticky;top:0;background:var(--blush);color:var(--plum);font-weight:800;z-index:1}
+tr.click{cursor:pointer}tr.click:hover td{background:#fdf6f9}
+.pill{display:inline-block;padding:.2rem .6rem;border-radius:999px;font-size:.75rem;font-weight:800}
+.pill.Pending{background:var(--wait-bg);color:var(--wait)}.pill.Approved{background:var(--ok-bg);color:var(--ok)}.pill.Rejected{background:var(--bad-bg);color:var(--bad)}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.stat{background:var(--blush);border-radius:14px;padding:10px 14px;font-size:.82rem}
+.stat b{display:block;font-family:var(--serif);font-size:1.35rem;color:var(--plum)}
+.meta{color:var(--muted);font-size:.9rem;margin-top:6px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;align-items:end}
+.actions .btns{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap}
+.notice{margin-top:14px;padding:12px 16px;border-radius:14px;background:var(--wait-bg);color:var(--wait);font-size:.9rem}
+.empty{color:var(--muted);padding:30px;text-align:center}
+.hide{display:none!important}
+@media (max-width:640px){.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><img src="/assets/alt-logo.avif" alt="Alt.Tribe"><div class="r hide" id="topBar"><button class="btn ghost" id="refresh">↻ Refresh</button><button class="btn ghost" id="logout">Lock</button></div></header>
+
+  <!-- passcode gate -->
+  <section class="card gate" id="gate">
+    <h1>Inventory <em>review</em></h1>
+    <p>For the Alt.Tribe team only. Enter the review passcode.</p>
+    <form id="gateForm"><input type="password" id="pass" placeholder="Passcode" autocomplete="current-password" required><button class="btn" type="submit">Open</button></form>
+    <div id="gateMsg"></div>
+  </section>
+
+  <!-- list -->
+  <section id="listView" class="hide">
+    <h1>Brand <em>inventory</em> submissions</h1>
+    <div class="stats" id="totals"></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="card"><div class="tbl" id="list"></div></div>
+  </section>
+
+  <!-- detail -->
+  <section id="detailView" class="hide">
+    <button class="btn ghost" id="back">← All submissions</button>
+    <div class="card" id="detail"></div>
+  </section>
+</div>
+
+<script>
+const INV = window.INV;
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmtDate = (s) => s ? new Date(s).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+let pass = "", subs = [], filter = "Pending";
+try { pass = sessionStorage.getItem("invPass") || ""; } catch (e) {}
+
+async function api(payload) { return INV.call({ ...payload, passcode: pass }); }
+
+$("#gateForm").onsubmit = async (e) => { e.preventDefault(); pass = $("#pass").value; await load(true); };
+$("#logout").onclick = () => { try { sessionStorage.removeItem("invPass"); } catch (e) {} location.reload(); };
+$("#refresh").onclick = () => load();
+$("#back").onclick = () => { $("#detailView").classList.add("hide"); $("#listView").classList.remove("hide"); };
+
+async function load(fromGate) {
+  try {
+    const r = await api({ action: "list" });
+    try { sessionStorage.setItem("invPass", pass); } catch (e) {}
+    subs = r.submissions || [];
+    $("#gate").classList.add("hide"); $("#topBar").classList.remove("hide");
+    $("#detailView").classList.add("hide"); $("#listView").classList.remove("hide");
+    renderList();
+  } catch (e) {
+    $("#gate").classList.remove("hide");
+    $("#gateMsg").innerHTML = `<div class="notice">${e.message === "NOT_CONNECTED" ? "This page isn't connected yet – add the Apps Script URL in config.js (see SETUP)." : e.message === "BAD_PASSCODE" ? "Wrong passcode." : "Couldn't load: " + esc(e.message)}</div>`;
+  }
+}
+
+function renderList() {
+  const counts = { Pending: 0, Approved: 0, Rejected: 0 };
+  let apProducts = 0, apUnits = 0;
+  subs.forEach((s) => { counts[s.status] = (counts[s.status] || 0) + 1; if (s.status === "Approved") { apProducts += +s.products || 0; apUnits += +s.units || 0; } });
+  $("#totals").innerHTML = `<div class="stat"><b>${counts.Pending}</b>waiting for review</div><div class="stat"><b>${counts.Approved}</b>approved uploads</div><div class="stat"><b>${apProducts.toLocaleString("en-IN")}</b>products approved</div><div class="stat"><b>${apUnits.toLocaleString("en-IN")}</b>units approved</div>`;
+  $("#tabs").innerHTML = ["Pending", "Approved", "Rejected", "All"].map((t) => `<button class="tab ${t === filter ? "on" : ""}" data-t="${t}">${t}${t !== "All" ? " · " + (counts[t] || 0) : ""}</button>`).join("");
+  document.querySelectorAll(".tab").forEach((b) => (b.onclick = () => { filter = b.dataset.t; renderList(); }));
+  const rows = subs.filter((s) => filter === "All" || s.status === filter);
+  if (!rows.length) { $("#list").innerHTML = `<div class="empty">Nothing here yet.</div>`; return; }
+  $("#list").innerHTML = `<table><tr><th>Submitted</th><th>Brand</th><th>Products</th><th>Units</th><th>MRP value</th><th>Sent by</th><th>Status</th><th>Reviewed</th></tr>
+    ${rows.map((s) => `<tr class="click" data-id="${esc(s.id)}"><td>${fmtDate(s.submittedAt)}</td><td><b>${esc(s.brand)}</b></td><td>${esc(s.products)}</td><td>${esc(s.units)}</td><td>${INV.formatINR(s.value)}</td><td>${esc(s.person)}<br><small>${esc(s.phone)}</small></td><td><span class="pill ${esc(s.status)}">${esc(s.status)}</span></td><td>${fmtDate(s.reviewedAt)}${s.reviewer ? "<br><small>by " + esc(s.reviewer) + "</small>" : ""}</td></tr>`).join("")}</table>`;
+  document.querySelectorAll("tr.click").forEach((tr) => (tr.onclick = () => openDetail(tr.dataset.id)));
+}
+
+async function openDetail(id) {
+  $("#listView").classList.add("hide"); $("#detailView").classList.remove("hide");
+  $("#detail").innerHTML = `<p class="meta">Loading…</p>`;
+  let r;
+  try { r = await api({ action: "get", id }); } catch (e) { $("#detail").innerHTML = `<div class="notice">Couldn't open: ${esc(e.message)}</div>`; return; }
+  const s = r.submission, cols = r.columns || INV.COLUMNS, prods = r.products || [];
+  $("#detail").innerHTML = `
+    <h1>${esc(s.brand)} <span class="pill ${esc(s.status)}" style="vertical-align:middle">${esc(s.status)}</span></h1>
+    <p class="meta">Ref ${esc(s.id)} · submitted ${fmtDate(s.submittedAt)} by ${esc(s.person)} · ${esc(s.phone)}${s.email ? " · " + esc(s.email) : ""} · file <b>${esc(s.fileName)}</b>${s.fileUrl ? ` · <a href="${esc(s.fileUrl)}" target="_blank" rel="noopener">open original Excel</a>` : ""}</p>
+    <div class="stats"><div class="stat"><b>${esc(s.products)}</b>products</div><div class="stat"><b>${esc(s.units)}</b>units</div><div class="stat"><b>${INV.formatINR(s.value)}</b>MRP value</div></div>
+    <div class="tbl"><table><tr><th>#</th>${cols.map((c) => `<th>${esc(c.label)}</th>`).join("")}</tr>
+      ${prods.map((p, i) => `<tr><td>${i + 1}</td>${cols.map((c) => `<td>${esc(c.key === "mrp" ? INV.formatINR(p[c.key]) : p[c.key])}</td>`).join("")}</tr>`).join("")}</table></div>
+    ${s.status === "Pending" ? `
+    <div class="actions">
+      <label>Your name *<input id="reviewer" placeholder="Who is approving"></label>
+      <label>Note (optional)<textarea id="note" placeholder="e.g. counted at store, 2 pieces short"></textarea></label>
+      <div class="btns"><button class="btn ok" id="approve">✓ Approve &amp; log</button><button class="btn no" id="reject">✕ Reject</button></div>
+      <div id="actMsg" style="grid-column:1/-1"></div>
+    </div>` : `<p class="meta" style="margin-top:16px">${esc(s.status)} on ${fmtDate(s.reviewedAt)} by ${esc(s.reviewer)}${s.note ? " — “" + esc(s.note) + "”" : ""}</p>`}`;
+  if (s.status === "Pending") {
+    try { $("#reviewer").value = localStorage.getItem("invReviewer") || ""; } catch (e) {}
+    $("#approve").onclick = () => decide(s.id, "Approved");
+    $("#reject").onclick = () => decide(s.id, "Rejected");
+  }
+}
+
+async function decide(id, decision) {
+  const reviewer = $("#reviewer").value.trim(), note = $("#note").value.trim();
+  if (!reviewer) { $("#actMsg").innerHTML = `<div class="notice">Please add your name.</div>`; return; }
+  if (decision === "Rejected" && !note) { $("#actMsg").innerHTML = `<div class="notice">Please add a note saying why it's rejected.</div>`; return; }
+  try { localStorage.setItem("invReviewer", reviewer); } catch (e) {}
+  document.querySelectorAll(".btns .btn").forEach((b) => (b.disabled = true));
+  try { await api({ action: "decide", id, decision, reviewer, note }); await load(); openDetail(id); }
+  catch (e) { document.querySelectorAll(".btns .btn").forEach((b) => (b.disabled = false)); $("#actMsg").innerHTML = `<div class="notice">Couldn't save: ${esc(e.message)}</div>`; }
+}
+
+if (pass) load(); else $("#pass").focus();
+</script>
+</body>
+</html>
