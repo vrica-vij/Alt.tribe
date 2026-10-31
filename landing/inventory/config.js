@@ -54,13 +54,13 @@ window.INV = {
 
   // checks that compare columns within a row: return an error message, or "" if fine
   ROW_RULES: [
-    { column: "Selling Price", check: (p) => p.purchase !== undefined && p.selling !== undefined && p.purchase !== p.selling
+    { column: "Selling Price", key: "selling", check: (p) => p.purchase !== undefined && p.selling !== undefined && p.purchase !== p.selling
         ? `Must be the same as Purchase Price (${p.purchase})` : "" },
-    { column: "Intra State Tax Name", check: (p) => p.intraName && p.intraRate !== undefined && p.intraName !== "GST" + p.intraRate
+    { column: "Intra State Tax Name", key: "intraName", check: (p) => p.intraName && p.intraRate !== undefined && p.intraName !== "GST" + p.intraRate
         ? `Doesn't match the Intra rate ${p.intraRate} – should be GST${p.intraRate}` : "" },
-    { column: "Inter State Tax Name", check: (p) => p.interName && p.interRate !== undefined && p.interName !== "IGST" + p.interRate
+    { column: "Inter State Tax Name", key: "interName", check: (p) => p.interName && p.interRate !== undefined && p.interName !== "IGST" + p.interRate
         ? `Doesn't match the Inter rate ${p.interRate} – should be IGST${p.interRate}` : "" },
-    { column: "Inter State Tax Rate", check: (p) => p.intraRate !== undefined && p.interRate !== undefined && p.intraRate !== p.interRate
+    { column: "Inter State Tax Rate", key: "interRate", check: (p) => p.intraRate !== undefined && p.interRate !== undefined && p.intraRate !== p.interRate
         ? `Must be the same as the Intra State Tax Rate (${p.intraRate})` : "" },
   ],
 };
@@ -176,7 +176,7 @@ window.INV = {
       });
       INV.ROW_RULES.forEach((rule) => {
         const msg = rule.check(p);
-        if (msg) add(r + 1, rule.column, msg, "");
+        if (msg) add(r + 1, rule.column, msg, rule.key ? p[rule.key] : "");
       });
       p._row = r + 1;
       products.push(p);

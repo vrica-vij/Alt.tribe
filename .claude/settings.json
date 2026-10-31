@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "ClaudeInChromeDomain(localhost:5173)",
-      "ClaudeInChromeDomain(localhost:4317)"
-    ]
-  }
-}
