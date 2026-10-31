@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500&display=swap" rel="stylesheet">
-<script src="../config.js?v=4"></script>
+<script src="../config.js?v=5"></script>
 <style>
 :root{--pink:#b74d79;--pink-soft:#e9b9cb;--blush:#f7e3ea;--cream:#f3ead8;--sand:#e7dccb;--gold:#b8912a;--berry:#7a2a4f;--plum:#5a1d3c;--ink:#4a1830;--muted:#8b6a78;--ok:#2f7d4f;--ok-bg:#e6f3ea;--bad:#b3261e;--bad-bg:#fbe9e7;--wait:#8a6a00;--wait-bg:#fff6dc;
   --sans:"Bricolage Grotesque",Helvetica,Arial,sans-serif;--serif:Fraunces,Georgia,serif}
@@ -43,6 +43,7 @@ th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #f0e6ea;white-sp
 th{position:sticky;top:0;background:var(--blush);color:var(--plum);font-weight:800;z-index:1}
 tr.click{cursor:pointer}tr.click:hover td{background:#fdf6f9}
 .pill{display:inline-block;padding:.2rem .6rem;border-radius:999px;font-size:.75rem;font-weight:800}
+.pill.in{background:#ece4f7;color:#5b3a8c}.pill.out{background:#fde8d8;color:#9a4a12}
 .pill.Pending{background:var(--wait-bg);color:var(--wait)}.pill.Approved{background:var(--ok-bg);color:var(--ok)}.pill.Rejected{background:var(--bad-bg);color:var(--bad)}
 .stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
 .stat{background:var(--blush);border-radius:14px;padding:10px 14px;font-size:.82rem}
@@ -91,6 +92,7 @@ const fmtDate = (s) => s ? new Date(s).toLocaleString("en-IN", { day: "2-digit",
 let pass = "", subs = [], filter = "Pending";
 try { pass = sessionStorage.getItem("invPass") || ""; } catch (e) {}
 
+const typePill = (t) => t === "Take back" ? `<span class="pill out" style="vertical-align:middle">↩ Take back</span>` : `<span class="pill in" style="vertical-align:middle">Stock in</span>`;
 async function api(payload) { return INV.call({ ...payload, passcode: pass }); }
 
 $("#gateForm").onsubmit = async (e) => { e.preventDefault(); pass = $("#pass").value; await load(true); };
@@ -114,15 +116,19 @@ async function load(fromGate) {
 
 function renderList() {
   const counts = { Pending: 0, Approved: 0, Rejected: 0 };
-  let apProducts = 0, apUnits = 0;
-  subs.forEach((s) => { counts[s.status] = (counts[s.status] || 0) + 1; if (s.status === "Approved") { apProducts += +s.products || 0; apUnits += +s.units || 0; } });
-  $("#totals").innerHTML = `<div class="stat"><b>${counts.Pending}</b>waiting for review</div><div class="stat"><b>${counts.Approved}</b>approved uploads</div><div class="stat"><b>${apProducts.toLocaleString("en-IN")}</b>products approved</div><div class="stat"><b>${apUnits.toLocaleString("en-IN")}</b>units approved</div>`;
+  let inUnits = 0, outUnits = 0, inUploads = 0;
+  subs.forEach((s) => {
+    counts[s.status] = (counts[s.status] || 0) + 1;
+    if (s.status !== "Approved") return;
+    if (s.type === "Take back") outUnits += +s.units || 0; else { inUnits += +s.units || 0; inUploads++; }
+  });
+  $("#totals").innerHTML = `<div class="stat"><b>${counts.Pending}</b>waiting for review</div><div class="stat"><b>${inUploads}</b>stock-in uploads approved</div><div class="stat"><b>${inUnits.toLocaleString("en-IN")}</b>units brought in</div><div class="stat"><b>${outUnits.toLocaleString("en-IN")}</b>units taken back</div><div class="stat"><b>${(inUnits - outUnits).toLocaleString("en-IN")}</b>units in store</div>`;
   $("#tabs").innerHTML = ["Pending", "Approved", "Rejected", "All"].map((t) => `<button class="tab ${t === filter ? "on" : ""}" data-t="${t}">${t}${t !== "All" ? " · " + (counts[t] || 0) : ""}</button>`).join("");
   document.querySelectorAll(".tab").forEach((b) => (b.onclick = () => { filter = b.dataset.t; renderList(); }));
   const rows = subs.filter((s) => filter === "All" || s.status === filter);
   if (!rows.length) { $("#list").innerHTML = `<div class="empty">Nothing here yet.</div>`; return; }
-  $("#list").innerHTML = `<table><tr><th>Submitted</th><th>Brand</th><th>Products</th><th>Units</th><th>Value (excl. GST)</th><th>Email</th><th>Status</th><th>Reviewed</th></tr>
-    ${rows.map((s) => `<tr class="click" data-id="${esc(s.id)}"><td>${fmtDate(s.submittedAt)}</td><td><b>${esc(s.brand)}</b></td><td>${esc(s.products)}</td><td>${esc(s.units)}</td><td>${INV.formatINR(s.value)}</td><td>${esc(s.email || "—")}</td><td><span class="pill ${esc(s.status)}">${esc(s.status)}</span></td><td>${fmtDate(s.reviewedAt)}${s.reviewer ? "<br><small>by " + esc(s.reviewer) + "</small>" : ""}</td></tr>`).join("")}</table>`;
+  $("#list").innerHTML = `<table><tr><th>Submitted</th><th>Type</th><th>Brand</th><th>Products</th><th>Units</th><th>Value (excl. GST)</th><th>Email</th><th>Status</th><th>Reviewed</th></tr>
+    ${rows.map((s) => `<tr class="click" data-id="${esc(s.id)}"><td>${fmtDate(s.submittedAt)}</td><td>${typePill(s.type)}</td><td><b>${esc(s.brand)}</b></td><td>${esc(s.products)}</td><td>${esc(s.units)}</td><td>${s.value === "" ? "—" : INV.formatINR(s.value)}</td><td>${esc(s.email || "—")}</td><td><span class="pill ${esc(s.status)}">${esc(s.status)}</span></td><td>${fmtDate(s.reviewedAt)}${s.reviewer ? "<br><small>by " + esc(s.reviewer) + "</small>" : ""}</td></tr>`).join("")}</table>`;
   document.querySelectorAll("tr.click").forEach((tr) => (tr.onclick = () => openDetail(tr.dataset.id)));
 }
 
@@ -133,8 +139,8 @@ async function openDetail(id) {
   try { r = await api({ action: "get", id }); } catch (e) { $("#detail").innerHTML = `<div class="notice">Couldn't open: ${esc(e.message)}</div>`; return; }
   const s = r.submission, cols = r.columns || INV.COLUMNS, prods = r.products || [];
   $("#detail").innerHTML = `
-    <h1>${esc(s.brand)} <span class="pill ${esc(s.status)}" style="vertical-align:middle">${esc(s.status)}</span></h1>
-    <p class="meta">Ref ${esc(s.id)} · submitted ${fmtDate(s.submittedAt)}${s.email ? " · " + esc(s.email) : ""} · file <b>${esc(s.fileName)}</b>${s.fileUrl ? ` · <a href="${esc(s.fileUrl)}" target="_blank" rel="noopener">open original Excel</a>` : ""}</p>
+    <h1>${esc(s.brand)} ${typePill(s.type)} <span class="pill ${esc(s.status)}" style="vertical-align:middle">${esc(s.status)}</span></h1>
+    <p class="meta">Ref ${esc(s.id)} · submitted ${fmtDate(s.submittedAt)}${s.email ? " · " + esc(s.email) : ""}${s.fileName ? " · file <b>" + esc(s.fileName) + "</b>" : ""}${s.fileUrl ? ` · <a href="${esc(s.fileUrl)}" target="_blank" rel="noopener">open original Excel</a>` : ""}</p>
     <div class="stats"><div class="stat"><b>${esc(s.products)}</b>products</div><div class="stat"><b>${esc(s.units)}</b>units</div><div class="stat"><b>${INV.formatINR(s.value)}</b>value (excl. GST)</div></div>
     <div class="tbl"><table><tr><th>#</th>${cols.map((c) => `<th>${esc(c.label)}</th>`).join("")}</tr>
       ${prods.map((p, i) => `<tr><td>${i + 1}</td>${cols.map((c) => `<td>${esc(INV.isMoney(c.key) ? INV.formatINR(p[c.key]) : p[c.key])}</td>`).join("")}</tr>`).join("")}</table></div>

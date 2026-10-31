@@ -204,7 +204,7 @@ window.INV = {
       body: JSON.stringify(payload),
     });
     const data = await res.json();
-    if (!data.ok) throw new Error(data.error || "Request failed");
+    if (!data.ok) { const err = new Error(data.error || "Request failed"); err.problems = data.problems; throw err; }
     return data;
   };
 })();
